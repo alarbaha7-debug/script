@@ -3,35 +3,41 @@ const axios = require('axios');
 /**
  * Determines the optimal chunk configuration based on target length
  * OPTIMIZED FOR GEMINI 2.5 FLASH FREE TIER LIMITS:
- * - Max output tokens: 8192 tokens (~32K characters per request)
+ * - Max output tokens: 8192 tokens
+ * - Realistic conversion: ~3.5 characters per token for narrative text
+ * - Safe max per chunk: ~12,000 characters (3,400 tokens with safety margin)
  * - Rate limits: 15 requests/minute, 1500 requests/day
- * - Strategy: Smart chunking with context passing for coherence
+ * - Strategy: Conservative chunking to avoid MAX_TOKENS errors
  *
  * @param {number} targetLength - Target character count
  * @returns {Object} Chunk configuration
  */
 function getChunkConfig(targetLength) {
-  // Chunk planning: balance between API efficiency and output quality
+  // FIXED: Reduced chunk sizes to stay safely under 8192 token limit
+  // Each chunk targets ~10-12K characters = ~2,800-3,400 tokens (safe margin)
 
-  if (targetLength <= 10000) {
-    // Very short scripts - 2 chunks for safety
-    return { chunks: 2, charsPerChunk: 6000, buffer: 2000 };
+  if (targetLength <= 12000) {
+    // Very short scripts - 2 chunks, ~6K each
+    return { chunks: 2, charsPerChunk: 6000, buffer: 1500 };
   }
-  if (targetLength <= 30000) {
-    // Medium scripts - 2 chunks (each ~15K, well under 32K limit)
-    return { chunks: 2, charsPerChunk: 15000, buffer: 5000 };
+  if (targetLength <= 25000) {
+    // Short scripts - 3 chunks, ~8K each
+    return { chunks: 3, charsPerChunk: 8500, buffer: 2000 };
+  }
+  if (targetLength <= 40000) {
+    // Medium scripts - 4 chunks, ~10K each
+    return { chunks: 4, charsPerChunk: 10000, buffer: 2500 };
   }
   if (targetLength <= 60000) {
-    // Long scripts - 3 chunks (each ~20K, safe zone)
-    return { chunks: 3, charsPerChunk: 20000, buffer: 10000 };
+    // Long scripts - 5 chunks, ~12K each
+    return { chunks: 5, charsPerChunk: 12000, buffer: 3000 };
   }
-  if (targetLength <= 70000) {
-    // Very long scripts - 3 chunks (each ~25K, still safe)
-    return { chunks: 3, charsPerChunk: 25000, buffer: 15000 };
+  if (targetLength <= 80000) {
+    // Very long scripts - 7 chunks, ~11.5K each
+    return { chunks: 7, charsPerChunk: 11500, buffer: 2500 };
   }
-  // Extremely long scripts - 3 chunks max (each ~35K, near limit but safe)
-  // Note: 35K chars ≈ 7K tokens, leaves headroom under 8192 token limit
-  return { chunks: 3, charsPerChunk: 35000, buffer: 20000 };
+  // Extremely long scripts - 10 chunks, ~12K each (max ~120K total)
+  return { chunks: 10, charsPerChunk: 12000, buffer: 3000 };
 }
 
 /**
@@ -228,10 +234,18 @@ Output only narration text.`;
       const candidate = response.data.candidates[0];
 
       // Check for content blocking or safety issues
-      if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+      // VALID finish reasons: 'STOP' (normal), 'MAX_TOKENS' (reached limit but content is valid)
+      // INVALID finish reasons: 'SAFETY' (blocked), 'RECITATION' (matched training data), 'OTHER' (error)
+      const validFinishReasons = ['STOP', 'MAX_TOKENS'];
+      if (candidate.finishReason && !validFinishReasons.includes(candidate.finishReason)) {
         console.error('❌ Content blocked. Finish reason:', candidate.finishReason);
         console.error('Full candidate:', JSON.stringify(candidate, null, 2));
         throw new Error(`Content generation blocked: ${candidate.finishReason}. Try modifying your plot details or title.`);
+      }
+
+      // Log if we hit max tokens (informational, not an error)
+      if (candidate.finishReason === 'MAX_TOKENS') {
+        console.log(`⚠️  Part ${partNum}/${config.chunks} reached max tokens (content is still valid)`);
       }
 
       // Validate nested structure before accessing
