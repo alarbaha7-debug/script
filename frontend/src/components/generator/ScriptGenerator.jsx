@@ -244,6 +244,62 @@ export default function ScriptGenerator() {
           </div>
         )}
 
+        {/* Auto-Generate Plot Section */}
+        {formData.niche && (
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    🎬 Auto-Generate Plot
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Let AI create a detailed plot outline based on your title and niche
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAutoGeneratePlot}
+                disabled={isGeneratingPlot || !formData.title || !formData.niche}
+                className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg text-base font-bold transition-all ${
+                  isGeneratingPlot || !formData.title || !formData.niche
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl'
+                }`}
+              >
+                {isGeneratingPlot ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Generating Plot with AI...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Generate Plot Automatically
+                  </>
+                )}
+              </button>
+
+              {!formData.title || !formData.niche ? (
+                <div className="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  💡 Enter a title and select a niche above to enable auto-generation
+                </div>
+              ) : (
+                <div className="mt-3 text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3">
+                  ✨ Ready! Click to generate a plot for: <strong>{formData.title}</strong>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Script Example */}
         <div className="mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -262,49 +318,15 @@ export default function ScriptGenerator() {
 
         {/* Plot Details */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-semibold text-gray-700">
-              Plot Details *
-            </label>
-            <button
-              type="button"
-              onClick={handleAutoGeneratePlot}
-              disabled={isGeneratingPlot || !formData.title || !formData.niche}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                isGeneratingPlot || !formData.title || !formData.niche
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-purple-600 hover:bg-purple-700 text-white'
-              }`}
-            >
-              {isGeneratingPlot ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Auto-Generate Plot
-                </>
-              )}
-            </button>
-          </div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Plot Details *
+          </label>
           <textarea
-            placeholder="Describe what your script should be about. Or click 'Auto-Generate Plot' to create one automatically based on your title..."
+            placeholder="Your plot will appear here after clicking 'Generate Plot Automatically' above, or you can write your own plot manually..."
             value={formData.plotDetails}
             onChange={e => setFormData({ ...formData, plotDetails: e.target.value })}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32"
           />
-          {!formData.title || !formData.niche ? (
-            <div className="text-sm text-amber-600 mt-1">
-              💡 Enter a title and select a niche to use auto-generate
-            </div>
-          ) : null}
         </div>
 
         {/* Extra Instructions */}
