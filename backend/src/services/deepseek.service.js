@@ -63,10 +63,15 @@ Analyze this script deeply and return a JSON object with the following structure
     "call_to_action_style": "describe style",
     "emotional_peaks": "describe when and how emotions peak"
   },
-  "master_prompt": "A comprehensive 500-1000 word prompt that incorporates ALL the analysis above. This prompt will be used to generate the new script. Include specific instructions about:\n- How to open the script (hook style)\n- Tone and pacing to maintain\n- Sentence structure patterns\n- How to build tension/interest\n- Narrative techniques to use\n- How to close the script\n- Any unique stylistic elements from the example\n\nMake this prompt extremely detailed and actionable for generating a ${niche} script about '${title}'."
+  "master_prompt": "A comprehensive 500-1000 word prompt that incorporates ALL the analysis above. This prompt will be used to generate the new script. Include specific instructions about: How to open the script (hook style), Tone and pacing to maintain, Sentence structure patterns, How to build tension/interest, Narrative techniques to use, How to close the script, Any unique stylistic elements from the example. Make this prompt extremely detailed and actionable for generating a ${niche} script about '${title}'."
 }
 
-IMPORTANT: Return ONLY valid JSON, no markdown formatting, no code blocks, just pure JSON.`;
+CRITICAL RULES FOR JSON:
+1. Return ONLY valid JSON - no markdown, no code blocks, no extra text
+2. All string values must escape special characters (newlines as \\n, tabs as \\t, quotes as \\")
+3. Do NOT include literal line breaks inside string values - use \\n instead
+4. Do NOT include control characters (tabs, carriage returns) - use \\t and \\r
+5. Make sure all quotes inside strings are escaped with backslash`;
 
     console.log('🔍 Analyzing script with DeepSeek R1...');
 
@@ -116,8 +121,78 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting, no code blocks, just 
       cleaned = cleaned.substring(firstBrace, lastBrace + 1);
     }
 
-    // Parse JSON
-    const analysis = JSON.parse(cleaned);
+    // Step 1: Remove problematic control characters
+    // These are characters that shouldn't appear in JSON at all
+    cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+    // Step 2: Try to parse
+    let analysis;
+    try {
+      analysis = JSON.parse(cleaned);
+      console.log('✅ JSON parsed successfully on first attempt');
+    } catch (parseError) {
+      console.log('⚠️ First parse attempt failed. Error:', parseError.message);
+      console.log('Attempting to repair JSON...');
+
+      // Advanced JSON repair strategy
+      try {
+        // Save the original for comparison
+        const beforeRepair = cleaned;
+
+        // Strategy: Find and fix unescaped characters inside string values
+        // This regex-based approach looks for patterns like: "key": "value with\nnewline"
+        // and fixes them to: "key": "value with\\nnewline"
+
+        let inString = false;
+        let escaped = false;
+        let repaired = '';
+
+        for (let i = 0; i < cleaned.length; i++) {
+          const char = cleaned[i];
+          const prevChar = i > 0 ? cleaned[i - 1] : '';
+
+          // Track if we're inside a string value
+          if (char === '"' && !escaped) {
+            inString = !inString;
+            repaired += char;
+          }
+          // If we're in a string and find a newline/tab/carriage return, escape it
+          else if (inString && !escaped) {
+            if (char === '\n') {
+              repaired += '\\n';
+            } else if (char === '\r') {
+              repaired += '\\r';
+            } else if (char === '\t') {
+              repaired += '\\t';
+            } else if (char === '\\') {
+              repaired += char;
+              escaped = true;
+            } else {
+              repaired += char;
+            }
+          } else {
+            repaired += char;
+            escaped = false;
+          }
+
+          // Handle escape sequences
+          if (char === '\\' && !escaped) {
+            escaped = true;
+          } else if (escaped && char !== '\\') {
+            escaped = false;
+          }
+        }
+
+        cleaned = repaired;
+        analysis = JSON.parse(cleaned);
+        console.log('✅ JSON repaired and parsed successfully');
+
+      } catch (secondError) {
+        console.error('❌ JSON repair failed:', secondError.message);
+        console.error('Problematic JSON snippet:', cleaned.substring(0, 500));
+        throw new Error('Failed to parse analysis response. The AI returned malformed JSON. Please try again.');
+      }
+    }
 
     console.log('✅ Analysis complete!');
 
