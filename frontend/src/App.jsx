@@ -52,23 +52,19 @@ function AppContent() {
               <ul className="text-sm text-gray-200 space-y-3">
                 <li className="flex items-center gap-3 animate-fade-in delay-100">
                   <span className="text-green-400 font-bold text-xl">✓</span>
-                  <span>5 Categories with 25+ Niches</span>
+                  <span>Write Up to 100,000 Characters — Ultra-High Quality</span>
                 </li>
                 <li className="flex items-center gap-3 animate-fade-in delay-200">
                   <span className="text-green-400 font-bold text-xl">✓</span>
-                  <span>Template System with Gemini 2.5 Flash</span>
+                  <span>Ultimate Long-Form Script Engine</span>
                 </li>
                 <li className="flex items-center gap-3 animate-fade-in delay-300">
                   <span className="text-green-400 font-bold text-xl">✓</span>
-                  <span>Generate 10K-100K character scripts</span>
+                  <span>The Ultimate AI Story Generator — 10x More Powerful</span>
                 </li>
                 <li className="flex items-center gap-3 animate-fade-in delay-400">
                   <span className="text-green-400 font-bold text-xl">✓</span>
-                  <span>Intelligent chunking for long scripts</span>
-                </li>
-                <li className="flex items-center gap-3 animate-fade-in delay-500">
-                  <span className="text-green-400 font-bold text-xl">✓</span>
-                  <span>Category-specific hooks & styling</span>
+                  <span>Story Generation Without Limits</span>
                 </li>
               </ul>
             </div>
