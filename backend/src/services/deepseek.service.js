@@ -63,7 +63,7 @@ Analyze this script deeply and return a JSON object with the following structure
     "call_to_action_style": "describe style",
     "emotional_peaks": "describe when and how emotions peak"
   },
-  "master_prompt": "A comprehensive 500-1000 word prompt that incorporates ALL the analysis above. This prompt will be used to generate the new script. Include specific instructions about: How to open the script (hook style), Tone and pacing to maintain, Sentence structure patterns, How to build tension/interest, Narrative techniques to use, How to close the script, Any unique stylistic elements from the example. Make this prompt extremely detailed and actionable for generating a ${niche} script about '${title}'."
+  "master_prompt": "A concise 150-250 word prompt that captures the CORE writing style from the analysis. Focus on: Opening hook technique, Tone and pacing, Key sentence patterns, How to build tension, Narrative approach, Unique stylistic elements. Keep it brief and actionable for generating a ${niche} script about '${title}'. IMPORTANT: Keep this prompt SHORT to fit within API token limits."
 }
 
 CRITICAL RULES FOR JSON:

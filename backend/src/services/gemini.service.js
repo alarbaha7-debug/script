@@ -36,22 +36,23 @@ function getChunkConfig(targetLength) {
 
 /**
  * Extracts the last portion of text for context continuity
+ * OPTIMIZED: Keep context short to save input tokens for Gemini free tier
  * @param {string} previousChunk - The previous chunk text
  * @returns {string} Context snippet for next chunk
  */
 function extractTailContext(previousChunk) {
-  // Extract last 8-10 sentences or ~500 characters for context
+  // Extract last 5-6 sentences or ~300 characters max (save input tokens)
   const sentences = previousChunk
     .split(/[.!?]+/)
     .filter(s => s.trim().length > 0);
 
   const lastSentences = sentences
-    .slice(-10)
+    .slice(-6)
     .join('. ') + '.';
 
-  // Limit to ~500 chars to keep prompt efficient
-  return lastSentences.length > 500
-    ? '...' + lastSentences.slice(-500)
+  // Limit to ~300 chars to save input tokens for free tier
+  return lastSentences.length > 300
+    ? '...' + lastSentences.slice(-300)
     : lastSentences;
 }
 
@@ -89,69 +90,34 @@ async function generateScript({
       let prompt = '';
 
       if (i === 0) {
-        // FIRST CHUNK: Use full master prompt and setup
+        // FIRST CHUNK: Concise prompt to save input tokens
         prompt = `${masterPrompt}
 
-SCRIPT DETAILS:
-- Title: ${title}
-- Niche: ${niche}
-- Style: ${styleType}
-- Plot: ${plotDetails}
-${extraInstructions ? `- Additional Instructions: ${extraInstructions}` : ''}
+SCRIPT:
+Title: ${title}
+Niche: ${niche}
+Style: ${styleType}
+Plot: ${plotDetails}
 
-GENERATION INSTRUCTIONS (Part ${partNum} of ${config.chunks}):
+TASK (Part ${partNum}/${config.chunks}):
 ${config.chunks === 1
-  ? `Write the COMPLETE script from beginning to end.
-Target length: ${config.charsPerChunk} characters.`
-  : `This is the FIRST part of a ${config.chunks}-part script.
-Target length for THIS part: approximately ${config.charsPerChunk} characters.
+  ? `Write complete ${config.charsPerChunk}-char script.`
+  : `Write OPENING (${config.charsPerChunk} chars): Hook, setup, build tension, end naturally.`}
 
-Write the OPENING section including:
-- A powerful hook following the analyzed pattern
-- The setup and introduction
-- Build initial tension/interest
-- Develop the story naturally
-- End at a compelling transition point (NOT a cliffhanger - just a natural break)`}
-
-CRITICAL REQUIREMENTS:
-- Follow the writing style patterns from the analysis EXACTLY
-- Match the tone, pacing, and sentence structure
-- Aim for ${config.charsPerChunk} characters (±${Math.floor(config.buffer/2)})
-- Make it engaging and true to the ${styleType} style
-- Write ONLY the script content - no meta-commentary`;
+RULES: Match analyzed style exactly. ${config.charsPerChunk}±${Math.floor(config.buffer/2)} chars. No meta-text.`;
 
       } else {
-        // CONTINUATION CHUNKS: Provide context from previous chunk
+        // CONTINUATION CHUNKS: Concise with context
         const previousContext = extractTailContext(chunks[i - 1]);
 
-        prompt = `Continue writing this ${styleType} script seamlessly.
+        prompt = `Continue ${styleType} script. Previous ended: "${previousContext}"
 
-CONTEXT - THE PREVIOUS PART ENDED WITH:
-"${previousContext}"
-
-CONTINUATION INSTRUCTIONS (Part ${partNum} of ${config.chunks}):
-Target length for THIS part: approximately ${config.charsPerChunk} characters.
-
+TASK (Part ${partNum}/${config.chunks}, ${config.charsPerChunk} chars):
 ${partNum === config.chunks
-  ? `This is the FINAL part.
-- Build toward a compelling climax
-- Resolve the main story/conflict
-- Provide a satisfying conclusion
-- End the script properly`
-  : `This is a MIDDLE section.
-- Continue building the story naturally
-- Develop tension and key events
-- Maintain narrative momentum
-- End at a natural transition point`}
+  ? `FINAL: Build climax, resolve conflict, conclude.`
+  : `MIDDLE: Continue story, build tension, natural transition.`}
 
-CRITICAL REQUIREMENTS:
-- Continue DIRECTLY where the previous part left off (no gap, no repetition)
-- Maintain EXACT same writing style, tone, voice, and pacing
-- NO meta phrases like "continuing from..." or "as we saw..." or "meanwhile..."
-- Start with the very next sentence of the story
-- Aim for ${config.charsPerChunk} characters (±${Math.floor(config.buffer/2)})
-- Keep perfect consistency with ${styleType} style
-- Write ONLY the script content - no commentary`;
+RULES: Continue directly. Same style/tone. No "meanwhile". ${config.charsPerChunk}±${Math.floor(config.buffer/2)} chars. No meta-text.`;
       }
 
       console.log(`📝 Generating part ${partNum}/${config.chunks}...`);
