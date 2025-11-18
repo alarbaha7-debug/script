@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY || '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';
+const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY || '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';
 const DEEPSEEK_URL = process.env.DEEPSEEK_URL || 'https://openrouter.ai/api/v1/chat/completions';
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek/deepseek-r1:free';
 
