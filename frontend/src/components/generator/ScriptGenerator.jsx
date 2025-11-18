@@ -18,6 +18,7 @@ export default function ScriptGenerator() {
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingPlot, setIsGeneratingPlot] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
   const [finalScript, setFinalScript] = useState(null);
@@ -30,6 +31,44 @@ export default function ScriptGenerator() {
       niche: niche.name,
       styleType: niche.styleType
     });
+  };
+
+  const handleAutoGeneratePlot = async () => {
+    // Validation
+    if (!formData.title) {
+      toast.error('Please enter a video title first');
+      return;
+    }
+
+    if (!formData.niche) {
+      toast.error('Please select a niche first');
+      return;
+    }
+
+    setIsGeneratingPlot(true);
+
+    try {
+      toast.loading('Generating plot details...', { id: 'plot-gen' });
+
+      const plotRes = await scriptAPI.generatePlot({
+        title: formData.title,
+        niche: formData.niche,
+        styleType: formData.styleType
+      });
+
+      setFormData({
+        ...formData,
+        plotDetails: plotRes.plot
+      });
+
+      toast.success('Plot details generated!', { id: 'plot-gen' });
+
+    } catch (error) {
+      console.error('Plot generation error:', error);
+      toast.error(error.response?.data?.error || error.message || 'Failed to generate plot', { id: 'plot-gen' });
+    } finally {
+      setIsGeneratingPlot(false);
+    }
   };
 
   const handleGenerate = async () => {
@@ -223,15 +262,49 @@ export default function ScriptGenerator() {
 
         {/* Plot Details */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Plot Details *
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-semibold text-gray-700">
+              Plot Details *
+            </label>
+            <button
+              type="button"
+              onClick={handleAutoGeneratePlot}
+              disabled={isGeneratingPlot || !formData.title || !formData.niche}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                isGeneratingPlot || !formData.title || !formData.niche
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-purple-600 hover:bg-purple-700 text-white'
+              }`}
+            >
+              {isGeneratingPlot ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Auto-Generate Plot
+                </>
+              )}
+            </button>
+          </div>
           <textarea
-            placeholder="Describe what your script should be about. Include key events, characters, and the overall story arc..."
+            placeholder="Describe what your script should be about. Or click 'Auto-Generate Plot' to create one automatically based on your title..."
             value={formData.plotDetails}
             onChange={e => setFormData({ ...formData, plotDetails: e.target.value })}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32"
           />
+          {!formData.title || !formData.niche ? (
+            <div className="text-sm text-amber-600 mt-1">
+              💡 Enter a title and select a niche to use auto-generate
+            </div>
+          ) : null}
         </div>
 
         {/* Extra Instructions */}
