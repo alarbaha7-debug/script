@@ -83,6 +83,8 @@ export default function ScriptGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedScript, setGeneratedScript] = useState('');
   const [generationTimeline, setGenerationTimeline] = useState([]);
+  const [currentProgress, setCurrentProgress] = useState(0);
+  const [currentMessage, setCurrentMessage] = useState('');
 
   // Load templates on mount
   useEffect(() => {
@@ -198,7 +200,53 @@ export default function ScriptGenerator() {
     }
 
     setIsGenerating(true);
+    setGeneratedScript(''); // Clear previous script
+    setGenerationTimeline([]);
+    setCurrentProgress(10);
+    setCurrentMessage('🎬 Starting script generation...');
+
     const toastId = toast.loading('Generating your script with Gemini 2.5 Flash...');
+
+    // Estimate chunk count based on target length
+    const estimateChunks = () => {
+      if (targetLength <= 12000) return 2;
+      if (targetLength <= 25000) return 3;
+      if (targetLength <= 40000) return 4;
+      if (targetLength <= 60000) return 5;
+      if (targetLength <= 80000) return 7;
+      return 10;
+    };
+
+    const estimatedChunks = estimateChunks();
+    const progressPerChunk = 80 / estimatedChunks; // 80% divided by chunks (10% start, 10% end)
+
+    // Fun cooking messages
+    const cookingMessages = [
+      '🔥 Firing up the AI engines...',
+      '🧠 Teaching AI about your story...',
+      '✨ Sprinkling some creative magic...',
+      '📝 Writing the first lines...',
+      '🎨 Crafting the narrative flow...',
+      '⚡ Boosting creativity levels...',
+      '🎬 Building suspense and tension...',
+      '💫 Adding emotional depth...',
+      '🌟 Polishing the masterpiece...',
+      '🚀 Almost there, finalizing...'
+    ];
+
+    let messageIndex = 0;
+    let currentChunk = 0;
+
+    // Simulate progress updates every 8 seconds (average chunk generation time)
+    const progressInterval = setInterval(() => {
+      if (currentChunk < estimatedChunks) {
+        currentChunk++;
+        const newProgress = Math.min(10 + (currentChunk * progressPerChunk), 90);
+        setCurrentProgress(Math.round(newProgress));
+        setCurrentMessage(cookingMessages[Math.min(messageIndex, cookingMessages.length - 1)]);
+        messageIndex++;
+      }
+    }, 8000); // Update every 8 seconds
 
     try {
       const response = await scriptAPI.generateFromTemplate({
@@ -210,11 +258,18 @@ export default function ScriptGenerator() {
         userApiKey: geminiApiKey
       });
 
+      clearInterval(progressInterval);
+      setCurrentProgress(100);
+      setCurrentMessage('🎉 Script generation complete!');
+
       setGeneratedScript(response.script);
       setGenerationTimeline(response.timeline || []);
       toast.success(`🎉 Script generated! ${response.stats.characterCount} characters`, { id: toastId });
 
     } catch (error) {
+      clearInterval(progressInterval);
+      setCurrentProgress(0);
+      setCurrentMessage('');
       console.error('Generation error:', error);
       toast.error(error.response?.data?.error || 'Failed to generate script', { id: toastId });
     } finally {
@@ -613,28 +668,55 @@ export default function ScriptGenerator() {
                         )}
                       </button>
 
-                      {/* Process Timeline with Progress */}
-                      {generationTimeline.length > 0 && (
+                      {/* LIVE Progress Bar (shown during generation OR after completion) */}
+                      {(isGenerating || generationTimeline.length > 0) && (
                         <div className="mt-8 animate-slide-in-up space-y-4">
-                          {/* Progress Bar */}
-                          <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-cyan-500/30 p-6">
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-white font-bold text-lg">Generation Progress</span>
-                              <span className="text-cyan-400 font-bold text-2xl">
-                                {generationTimeline[generationTimeline.length - 1]?.progress || 0}%
+                          {/* Animated Progress Card */}
+                          <div className="bg-gradient-to-br from-slate-800/60 via-purple-900/40 to-slate-800/60 backdrop-blur-xl rounded-3xl border-2 border-cyan-400/40 p-8 shadow-2xl shadow-cyan-500/20">
+                            {/* Progress Header */}
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="text-white font-black text-2xl flex items-center gap-3">
+                                <span className="text-3xl animate-bounce">🍳</span>
+                                Cooking Your Script
+                              </span>
+                              <span className="text-cyan-400 font-black text-4xl tabular-nums">
+                                {isGenerating ? currentProgress : (generationTimeline[generationTimeline.length - 1]?.progress || 100)}%
                               </span>
                             </div>
-                            <div className="relative w-full h-6 bg-slate-900/50 rounded-full overflow-hidden border border-slate-700/50">
+
+                            {/* Animated Progress Bar */}
+                            <div className="relative w-full h-8 bg-slate-900/70 rounded-full overflow-hidden border-2 border-slate-700/50 shadow-inner">
                               <div
-                                className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 transition-all duration-500 ease-out rounded-full"
-                                style={{ width: `${generationTimeline[generationTimeline.length - 1]?.progress || 0}%` }}
+                                className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 transition-all duration-1000 ease-out rounded-full shadow-lg"
+                                style={{ width: `${isGenerating ? currentProgress : (generationTimeline[generationTimeline.length - 1]?.progress || 100)}%` }}
                               >
+                                {/* Animated shimmer effect */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                                {/* Pulsing glow */}
                                 <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                               </div>
                             </div>
-                            <div className="mt-2 text-sm text-gray-400 text-center">
-                              {generationTimeline[generationTimeline.length - 1]?.event}
+
+                            {/* Animated Message */}
+                            <div className="mt-4 text-center">
+                              <div className="text-lg font-bold text-white animate-pulse bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
+                                {isGenerating ? currentMessage : (generationTimeline[generationTimeline.length - 1]?.event || '✅ Complete!')}
+                              </div>
+                              {!isGenerating && generationTimeline.length > 0 && (
+                                <div className="text-sm text-gray-300 mt-2">
+                                  {generationTimeline[generationTimeline.length - 1]?.details}
+                                </div>
+                              )}
                             </div>
+
+                            {/* Fun animated dots while generating */}
+                            {isGenerating && (
+                              <div className="flex justify-center gap-2 mt-4">
+                                <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce"></div>
+                                <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce delay-100"></div>
+                                <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-200"></div>
+                              </div>
+                            )}
                           </div>
 
                           {/* Timeline Details (Collapsible) */}
