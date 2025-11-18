@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { scriptAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Sparkles, Zap, Film, Save, Wand2 } from 'lucide-react';
+import { Sparkles, Zap, Film, Save, Wand2, Play, Download, Copy } from 'lucide-react';
 
 // Categories with emojis and colors
 const CATEGORIES = [
-  { id: 'emotional', name: '❤️ Emotional', emoji: '❤️', color: 'from-pink-500 to-rose-500', description: 'Deep feelings, empathy, inspiration' },
-  { id: 'horror', name: '👻 Horror', emoji: '👻', color: 'from-purple-600 to-indigo-700', description: 'Creepy, unsettling, suspenseful' },
-  { id: 'mystery', name: '🔍 Mystery', emoji: '🔍', color: 'from-blue-500 to-cyan-600', description: 'Unsolved, strange, curious' },
-  { id: 'adventure', name: '🗺️ Adventure', emoji: '🗺️', color: 'from-green-500 to-emerald-600', description: 'Journey, exploration, discovery' },
-  { id: 'educational', name: '📚 Educational', emoji: '📚', color: 'from-orange-500 to-amber-600', description: 'Facts, lessons, knowledge' }
+  { id: 'emotional', name: '❤️ Emotional', emoji: '❤️', color: 'from-pink-500 via-rose-500 to-red-500', bgColor: 'bg-pink-500/10', description: 'Deep feelings, empathy, inspiration' },
+  { id: 'horror', name: '👻 Horror', emoji: '👻', color: 'from-purple-600 via-violet-600 to-indigo-700', bgColor: 'bg-purple-500/10', description: 'Creepy, unsettling, suspenseful' },
+  { id: 'mystery', name: '🔍 Mystery', emoji: '🔍', color: 'from-blue-500 via-cyan-500 to-teal-600', bgColor: 'bg-blue-500/10', description: 'Unsolved, strange, curious' },
+  { id: 'adventure', name: '🗺️ Adventure', emoji: '🗺️', color: 'from-green-500 via-emerald-500 to-teal-600', bgColor: 'bg-green-500/10', description: 'Journey, exploration, discovery' },
+  { id: 'educational', name: '📚 Educational', emoji: '📚', color: 'from-orange-500 via-amber-500 to-yellow-600', bgColor: 'bg-orange-500/10', description: 'Facts, lessons, knowledge' }
 ];
 
 // Niches by category
@@ -26,13 +26,14 @@ export default function ScriptGenerator() {
   const { geminiApiKey } = useAuth();
 
   // State
-  const [activeTab, setActiveTab] = useState('create'); // 'create' or 'generate'
+  const [activeTab, setActiveTab] = useState('create');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedNiche, setSelectedNiche] = useState('');
   const [customNiche, setCustomNiche] = useState('');
   const [templateName, setTemplateName] = useState('');
   const [exampleScript, setExampleScript] = useState('');
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
+  const [createdTemplate, setCreatedTemplate] = useState(null);
 
   // Generation state
   const [title, setTitle] = useState('');
@@ -40,19 +41,16 @@ export default function ScriptGenerator() {
   const [targetLength, setTargetLength] = useState(30000);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedScript, setGeneratedScript] = useState('');
-  const [templates, setTemplates] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   const finalNiche = customNiche || selectedNiche;
 
   const handleCategorySelect = (categoryId) => {
     setSelectedCategory(categoryId);
-    setSelectedNiche(''); // Reset niche when category changes
+    setSelectedNiche('');
     setCustomNiche('');
   };
 
   const handleCreateTemplate = async () => {
-    // Validation
     if (!templateName.trim()) {
       toast.error('Please enter a template name');
       return;
@@ -75,7 +73,7 @@ export default function ScriptGenerator() {
     }
 
     setIsCreatingTemplate(true);
-    const toastId = toast.loading('Analyzing script and creating template...');
+    const toastId = toast.loading('Analyzing script with Gemini 2.5 Flash...');
 
     try {
       const response = await scriptAPI.createTemplate({
@@ -86,7 +84,8 @@ export default function ScriptGenerator() {
         userApiKey: geminiApiKey
       });
 
-      toast.success('Template created successfully!', { id: toastId });
+      setCreatedTemplate(response.template);
+      toast.success('✨ Template created successfully!', { id: toastId });
 
       // Reset form
       setTemplateName('');
@@ -96,7 +95,7 @@ export default function ScriptGenerator() {
       setCustomNiche('');
 
       // Switch to generate tab
-      setActiveTab('generate');
+      setTimeout(() => setActiveTab('generate'), 500);
 
     } catch (error) {
       console.error('Template creation error:', error);
@@ -107,9 +106,8 @@ export default function ScriptGenerator() {
   };
 
   const handleGenerateScript = async () => {
-    // Validation
-    if (!selectedTemplate) {
-      toast.error('Please select a template first');
+    if (!createdTemplate) {
+      toast.error('Please create a template first');
       return;
     }
     if (!title.trim()) {
@@ -126,11 +124,11 @@ export default function ScriptGenerator() {
     }
 
     setIsGenerating(true);
-    const toastId = toast.loading('Generating your script...');
+    const toastId = toast.loading('Generating your script with Gemini 2.5 Flash...');
 
     try {
       const response = await scriptAPI.generateFromTemplate({
-        templateId: selectedTemplate.id,
+        template: createdTemplate,
         title: title.trim(),
         plotDetails: plotDetails.trim(),
         targetCharacters: targetLength,
@@ -138,7 +136,7 @@ export default function ScriptGenerator() {
       });
 
       setGeneratedScript(response.script);
-      toast.success(`Script generated! ${response.stats.characterCount} characters`, { id: toastId });
+      toast.success(`🎉 Script generated! ${response.stats.characterCount} characters`, { id: toastId });
 
     } catch (error) {
       console.error('Generation error:', error);
@@ -148,53 +146,74 @@ export default function ScriptGenerator() {
     }
   };
 
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedScript);
+    toast.success('Script copied to clipboard!');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated Background */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden">
+      {/* AMAZING ANIMATED BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -top-48 -left-48 animate-pulse"></div>
-        <div className="absolute w-96 h-96 bg-blue-500/20 rounded-full blur-3xl top-1/2 -right-48 animate-pulse delay-1000"></div>
-        <div className="absolute w-96 h-96 bg-pink-500/20 rounded-full blur-3xl -bottom-48 left-1/2 animate-pulse delay-2000"></div>
+        {/* Animated gradient orbs */}
+        <div className="absolute w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-3xl -top-48 -left-48 animate-float"></div>
+        <div className="absolute w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-3xl top-1/4 -right-64 animate-float-slow"></div>
+        <div className="absolute w-[400px] h-[400px] bg-blue-500/25 rounded-full blur-3xl bottom-0 left-1/3 animate-float-slower"></div>
+        <div className="absolute w-[350px] h-[350px] bg-cyan-400/20 rounded-full blur-3xl top-1/2 right-1/4 animate-pulse-slow"></div>
+        <div className="absolute w-[450px] h-[450px] bg-violet-600/20 rounded-full blur-3xl -bottom-32 -right-32 animate-float"></div>
+
+        {/* Gradient mesh overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 via-transparent to-blue-900/10"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-pink-900/20 via-transparent to-transparent"></div>
+
+        {/* Animated particles */}
+        <div className="absolute top-20 left-20 w-2 h-2 bg-purple-400 rounded-full animate-ping"></div>
+        <div className="absolute top-40 right-40 w-1 h-1 bg-pink-400 rounded-full animate-ping delay-1000"></div>
+        <div className="absolute bottom-40 left-60 w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping delay-2000"></div>
+        <div className="absolute top-60 right-80 w-1 h-1 bg-cyan-400 rounded-full animate-ping delay-3000"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-12 animate-fade-in">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Sparkles className="w-12 h-12 text-purple-400 animate-pulse" />
-            <h1 className="text-6xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+      <div className="relative max-w-7xl mx-auto px-4 py-12 z-10">
+        {/* HEADER WITH AMAZING ANIMATION */}
+        <div className="text-center mb-12 animate-fade-in-down">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <Sparkles className="w-14 h-14 text-purple-400 animate-spin-slow" />
+            <h1 className="text-7xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-gradient-x">
               FacelessScriptPro
             </h1>
-            <Sparkles className="w-12 h-12 text-pink-400 animate-pulse" />
+            <Sparkles className="w-14 h-14 text-pink-400 animate-spin-slow-reverse" />
           </div>
-          <p className="text-xl text-gray-300 font-medium">
-            AI-Powered YouTube Script Generator with Template System
+          <p className="text-2xl text-gray-300 font-medium mb-2 animate-fade-in">
+            AI-Powered YouTube Script Generator
+          </p>
+          <p className="text-sm text-purple-300 animate-pulse-slow">
+            Powered by Gemini 2.5 Flash with Template System
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-xl p-2 rounded-2xl border border-purple-500/20 shadow-2xl">
+        {/* ANIMATED TAB SWITCHER */}
+        <div className="flex justify-center mb-10 animate-fade-in">
+          <div className="bg-slate-800/60 backdrop-blur-2xl p-2 rounded-3xl border border-purple-500/30 shadow-2xl shadow-purple-500/20">
             <button
               onClick={() => setActiveTab('create')}
-              className={`px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center gap-2 ${
+              className={`px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-500 flex items-center gap-3 ${
                 activeTab === 'create'
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white shadow-xl shadow-purple-500/50 scale-105 animate-gradient-x'
+                  : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
               }`}
             >
-              <Save className="w-5 h-5" />
+              <Save className={`w-6 h-6 ${activeTab === 'create' ? 'animate-bounce-slow' : ''}`} />
               Create Template
             </button>
             <button
               onClick={() => setActiveTab('generate')}
-              className={`px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center gap-2 ${
+              className={`px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-500 flex items-center gap-3 ${
                 activeTab === 'generate'
-                  ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg scale-105'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 text-white shadow-xl shadow-blue-500/50 scale-105 animate-gradient-x'
+                  : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
               }`}
             >
-              <Wand2 className="w-5 h-5" />
+              <Wand2 className={`w-6 h-6 ${activeTab === 'generate' ? 'animate-bounce-slow' : ''}`} />
               Generate Script
             </button>
           </div>
@@ -202,46 +221,52 @@ export default function ScriptGenerator() {
 
         {/* CREATE TEMPLATE TAB */}
         {activeTab === 'create' && (
-          <div className="animate-slide-in">
-            <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl p-8 border border-purple-500/20 shadow-2xl">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                <Film className="w-8 h-8 text-purple-400" />
+          <div className="animate-slide-in-right">
+            <div className="bg-slate-800/40 backdrop-blur-2xl rounded-3xl p-10 border border-purple-500/30 shadow-2xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-500">
+              <h2 className="text-4xl font-bold text-white mb-8 flex items-center gap-4 animate-fade-in">
+                <Film className="w-10 h-10 text-purple-400 animate-pulse-slow" />
                 Create Your Template
               </h2>
 
               {/* Template Name */}
-              <div className="mb-6">
-                <label className="block text-white font-bold mb-2">Template Name *</label>
+              <div className="mb-8 animate-fade-in delay-100">
+                <label className="block text-white font-bold mb-3 text-lg">✨ Template Name *</label>
                 <input
                   type="text"
                   value={templateName}
                   onChange={(e) => setTemplateName(e.target.value)}
                   placeholder="e.g., My Horror Style, Crime Documentary Style"
-                  className="w-full bg-slate-700/50 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none transition-all"
+                  className="w-full bg-slate-900/50 border-2 border-purple-500/40 rounded-2xl px-6 py-4 text-white text-lg placeholder-gray-400 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 focus:outline-none transition-all duration-300 hover:border-purple-500/60"
                 />
               </div>
 
               {/* Category Selector */}
-              <div className="mb-6">
-                <label className="block text-white font-bold mb-4 text-xl">Select Category *</label>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                  {CATEGORIES.map((cat) => (
+              <div className="mb-8 animate-fade-in delay-200">
+                <label className="block text-white font-bold mb-5 text-2xl">🎯 Select Category *</label>
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
+                  {CATEGORIES.map((cat, idx) => (
                     <button
                       key={cat.id}
                       onClick={() => handleCategorySelect(cat.id)}
-                      className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 transform hover:scale-105 ${
+                      style={{ animationDelay: `${idx * 100}ms` }}
+                      className={`group relative overflow-hidden rounded-3xl p-8 transition-all duration-500 transform hover:scale-110 hover:-rotate-2 animate-fade-in-up ${
                         selectedCategory === cat.id
-                          ? `bg-gradient-to-br ${cat.color} shadow-2xl scale-105`
-                          : 'bg-slate-700/50 hover:bg-slate-700 border-2 border-purple-500/20'
+                          ? `bg-gradient-to-br ${cat.color} shadow-2xl scale-105 animate-pulse-glow`
+                          : `bg-slate-700/50 hover:bg-slate-700 border-2 border-purple-500/30 hover:border-purple-500/60`
                       }`}
                     >
-                      <div className="text-5xl mb-3">{cat.emoji}</div>
-                      <div className="font-bold text-white text-lg mb-2">{cat.name.replace(/^.+\s/, '')}</div>
-                      <div className="text-xs text-gray-300">{cat.description}</div>
+                      {/* Animated glow effect when selected */}
+                      {selectedCategory === cat.id && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                      )}
+
+                      <div className="text-6xl mb-4 transform group-hover:scale-125 transition-transform duration-300">{cat.emoji}</div>
+                      <div className="font-bold text-white text-xl mb-3">{cat.name.replace(/^.+\s/, '')}</div>
+                      <div className="text-xs text-gray-200">{cat.description}</div>
 
                       {selectedCategory === cat.id && (
-                        <div className="absolute top-2 right-2">
-                          <Zap className="w-6 h-6 text-yellow-300 animate-pulse" />
+                        <div className="absolute top-3 right-3">
+                          <Zap className="w-8 h-8 text-yellow-300 animate-pulse" />
                         </div>
                       )}
                     </button>
@@ -251,28 +276,29 @@ export default function ScriptGenerator() {
 
               {/* Niche Selector */}
               {selectedCategory && (
-                <div className="mb-6 animate-fade-in">
-                  <label className="block text-white font-bold mb-4 text-xl">Select Niche *</label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-                    {NICHES_BY_CATEGORY[selectedCategory].map((niche) => (
+                <div className="mb-8 animate-slide-in-up">
+                  <label className="block text-white font-bold mb-5 text-2xl">🎬 Select Niche *</label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-5">
+                    {NICHES_BY_CATEGORY[selectedCategory].map((niche, idx) => (
                       <button
                         key={niche}
                         onClick={() => {
                           setSelectedNiche(niche);
                           setCustomNiche('');
                         }}
-                        className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                        style={{ animationDelay: `${idx * 50}ms` }}
+                        className={`px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 animate-fade-in-up ${
                           selectedNiche === niche
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105'
-                            : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-purple-500/20'
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xl shadow-purple-500/50 scale-105'
+                            : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700 border-2 border-purple-500/30 hover:border-purple-500/60 hover:scale-105'
                         }`}
                       >
                         {niche}
                       </button>
                     ))}
                   </div>
-                  <div>
-                    <label className="block text-gray-300 font-medium mb-2">Or enter custom niche:</label>
+                  <div className="animate-fade-in">
+                    <label className="block text-gray-300 font-medium mb-3 text-lg">💡 Or enter custom niche:</label>
                     <input
                       type="text"
                       value={customNiche}
@@ -281,27 +307,29 @@ export default function ScriptGenerator() {
                         if (e.target.value) setSelectedNiche('');
                       }}
                       placeholder="e.g., Ghost Stories, Serial Killers, etc."
-                      className="w-full bg-slate-700/50 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none"
+                      className="w-full bg-slate-900/50 border-2 border-purple-500/40 rounded-2xl px-6 py-4 text-white text-lg placeholder-gray-400 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 focus:outline-none transition-all duration-300"
                     />
                   </div>
                 </div>
               )}
 
               {/* Example Script */}
-              <div className="mb-6">
-                <label className="block text-white font-bold mb-2">Example Script *</label>
-                <p className="text-gray-400 text-sm mb-3">
-                  Paste your best script here (500+ characters). This will be analyzed to create your template.
+              <div className="mb-8 animate-fade-in delay-300">
+                <label className="block text-white font-bold mb-3 text-lg">📝 Example Script *</label>
+                <p className="text-gray-400 text-sm mb-4">
+                  Paste your best script here (500+ characters). Gemini 2.5 Flash will analyze it to create your template.
                 </p>
                 <textarea
                   value={exampleScript}
                   onChange={(e) => setExampleScript(e.target.value)}
                   placeholder="Paste your example script here..."
-                  rows={12}
-                  className="w-full bg-slate-700/50 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:border-purple-500 focus:outline-none resize-none font-mono text-sm"
+                  rows={14}
+                  className="w-full bg-slate-900/50 border-2 border-purple-500/40 rounded-2xl px-6 py-4 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 focus:outline-none resize-none font-mono text-base transition-all duration-300"
                 />
-                <div className="text-right text-sm mt-2 text-gray-400">
-                  {exampleScript.length} characters
+                <div className="flex justify-between items-center mt-3">
+                  <div className={`text-sm font-medium ${exampleScript.length >= 500 ? 'text-green-400' : 'text-gray-400'}`}>
+                    {exampleScript.length} characters {exampleScript.length >= 500 ? '✓' : `(need ${500 - exampleScript.length} more)`}
+                  </div>
                 </div>
               </div>
 
@@ -309,21 +337,21 @@ export default function ScriptGenerator() {
               <button
                 onClick={handleCreateTemplate}
                 disabled={isCreatingTemplate}
-                className={`w-full py-5 rounded-2xl font-bold text-xl transition-all duration-300 flex items-center justify-center gap-3 ${
+                className={`w-full py-6 rounded-3xl font-bold text-2xl transition-all duration-500 flex items-center justify-center gap-4 ${
                   isCreatingTemplate
                     ? 'bg-gray-600 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-500 hover:via-pink-500 hover:to-blue-500 text-white shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105'
+                    : 'bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-500 hover:via-pink-500 hover:to-blue-500 text-white shadow-2xl hover:shadow-purple-500/60 transform hover:scale-105 active:scale-95 animate-gradient-x'
                 }`}
               >
                 {isCreatingTemplate ? (
                   <>
-                    <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                     Creating Template...
                   </>
                 ) : (
                   <>
-                    <Save className="w-6 h-6" />
-                    Create Template
+                    <Save className="w-8 h-8 animate-bounce-slow" />
+                    Create Template with Gemini 2.5 Flash
                   </>
                 )}
               </button>
@@ -333,37 +361,236 @@ export default function ScriptGenerator() {
 
         {/* GENERATE SCRIPT TAB */}
         {activeTab === 'generate' && (
-          <div className="animate-slide-in">
-            <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                <Wand2 className="w-8 h-8 text-blue-400" />
+          <div className="animate-slide-in-left">
+            <div className="bg-slate-800/40 backdrop-blur-2xl rounded-3xl p-10 border border-blue-500/30 shadow-2xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-500">
+              <h2 className="text-4xl font-bold text-white mb-8 flex items-center gap-4">
+                <Wand2 className="w-10 h-10 text-blue-400 animate-pulse-slow" />
                 Generate Script from Template
               </h2>
 
-              <div className="text-center text-gray-400 py-12">
-                <p>Template selection and script generation UI will be added here</p>
-                <p className="text-sm mt-2">Coming in next update...</p>
-              </div>
+              {!createdTemplate ? (
+                <div className="text-center py-16 animate-fade-in">
+                  <Film className="w-24 h-24 text-gray-500 mx-auto mb-6 animate-pulse" />
+                  <p className="text-xl text-gray-400 mb-4">No template created yet</p>
+                  <p className="text-gray-500 mb-8">Create a template first to start generating scripts</p>
+                  <button
+                    onClick={() => setActiveTab('create')}
+                    className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold text-lg hover:scale-105 transition-transform duration-300"
+                  >
+                    Create Template
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {/* Template Info */}
+                  <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/40 rounded-2xl p-6 animate-fade-in">
+                    <h3 className="text-xl font-bold text-white mb-3">📋 Active Template</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-400">Name:</span>
+                        <span className="text-white font-semibold ml-2">{createdTemplate.name}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Category:</span>
+                        <span className="text-white font-semibold ml-2 capitalize">{createdTemplate.category}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Niche:</span>
+                        <span className="text-white font-semibold ml-2">{createdTemplate.niche}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title Input */}
+                  <div className="animate-fade-in delay-100">
+                    <label className="block text-white font-bold mb-3 text-lg">🎬 Video Title *</label>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="e.g., The Haunting of Hill House: True Story"
+                      className="w-full bg-slate-900/50 border-2 border-blue-500/40 rounded-2xl px-6 py-4 text-white text-lg placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-300"
+                    />
+                  </div>
+
+                  {/* Plot Details */}
+                  <div className="animate-fade-in delay-200">
+                    <label className="block text-white font-bold mb-3 text-lg">📖 Plot Details *</label>
+                    <textarea
+                      value={plotDetails}
+                      onChange={(e) => setPlotDetails(e.target.value)}
+                      placeholder="Describe the main plot, key events, and story arc..."
+                      rows={8}
+                      className="w-full bg-slate-900/50 border-2 border-blue-500/40 rounded-2xl px-6 py-4 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none resize-none transition-all duration-300"
+                    />
+                  </div>
+
+                  {/* Target Length */}
+                  <div className="animate-fade-in delay-300">
+                    <label className="block text-white font-bold mb-3 text-lg">📏 Target Length: {targetLength.toLocaleString()} characters</label>
+                    <input
+                      type="range"
+                      min="10000"
+                      max="100000"
+                      step="5000"
+                      value={targetLength}
+                      onChange={(e) => setTargetLength(parseInt(e.target.value))}
+                      className="w-full h-3 bg-slate-700 rounded-full appearance-none cursor-pointer accent-blue-500"
+                    />
+                    <div className="flex justify-between text-sm text-gray-400 mt-2">
+                      <span>10K (short)</span>
+                      <span>55K (medium)</span>
+                      <span>100K (long)</span>
+                    </div>
+                  </div>
+
+                  {/* Generate Button */}
+                  <button
+                    onClick={handleGenerateScript}
+                    disabled={isGenerating}
+                    className={`w-full py-6 rounded-3xl font-bold text-2xl transition-all duration-500 flex items-center justify-center gap-4 ${
+                      isGenerating
+                        ? 'bg-gray-600 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 hover:from-blue-500 hover:via-cyan-500 hover:to-blue-500 text-white shadow-2xl hover:shadow-blue-500/60 transform hover:scale-105 active:scale-95 animate-gradient-x'
+                    }`}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Generating Script...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-8 h-8 animate-bounce-slow" />
+                        Generate Script with Gemini 2.5 Flash
+                      </>
+                    )}
+                  </button>
+
+                  {/* Generated Script Output */}
+                  {generatedScript && (
+                    <div className="mt-8 animate-slide-in-up">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-2xl font-bold text-white">✨ Your Generated Script</h3>
+                        <button
+                          onClick={copyToClipboard}
+                          className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                        >
+                          <Copy className="w-5 h-5" />
+                          Copy
+                        </button>
+                      </div>
+                      <div className="bg-slate-900/50 border-2 border-green-500/40 rounded-2xl p-6 max-h-96 overflow-y-auto">
+                        <pre className="text-white whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                          {generatedScript}
+                        </pre>
+                      </div>
+                      <div className="mt-4 text-center text-sm text-gray-400">
+                        {generatedScript.length.toLocaleString()} characters • {Math.round(generatedScript.length / 5).toLocaleString()} words
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
 
+      {/* CSS ANIMATIONS */}
       <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(-20px); }
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          33% { transform: translate(30px, -30px) rotate(5deg); }
+          66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+        @keyframes float-slow {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-20px, -40px) scale(1.1); }
+        }
+        @keyframes float-slower {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(40px, -20px) rotate(10deg); }
+        }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+          50% { box-shadow: 0 0 40px rgba(236, 72, 153, 0.6); }
+        }
+        @keyframes gradient-x {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes fade-in-down {
+          from { opacity: 0; transform: translateY(-30px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes slide-in {
-          from { opacity: 0; transform: translateX(-30px); }
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slide-in-right {
+          from { opacity: 0; transform: translateX(-40px); }
           to { opacity: 1; transform: translateX(0); }
         }
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
+        @keyframes slide-in-left {
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-        .animate-slide-in {
-          animation: slide-in 0.5s ease-out;
+        @keyframes slide-in-up {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes spin-slow-reverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+
+        .animate-float { animation: float 20s ease-in-out infinite; }
+        .animate-float-slow { animation: float-slow 25s ease-in-out infinite; }
+        .animate-float-slower { animation: float-slower 30s ease-in-out infinite; }
+        .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 3s ease infinite;
+        }
+        .animate-shimmer { animation: shimmer 2s infinite; }
+        .animate-fade-in-down { animation: fade-in-down 0.8s ease-out; }
+        .animate-fade-in { animation: fade-in 0.6s ease-out; }
+        .animate-slide-in-right { animation: slide-in-right 0.6s ease-out; }
+        .animate-slide-in-left { animation: slide-in-left 0.6s ease-out; }
+        .animate-slide-in-up { animation: slide-in-up 0.6s ease-out; }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out; }
+        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+        .animate-spin-slow-reverse { animation: spin-slow-reverse 8s linear infinite; }
+        .animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-1000 { animation-delay: 1000ms; }
+        .delay-2000 { animation-delay: 2000ms; }
+        .delay-3000 { animation-delay: 3000ms; }
       `}</style>
     </div>
   );
