@@ -2,21 +2,29 @@ const axios = require('axios');
 
 /**
  * Determines the optimal chunk configuration based on target length
+ * OPTIMIZED FOR GEMINI 2.5 FLASH FREE TIER LIMITS:
+ * - Max output tokens: 8192 tokens (~32K characters)
+ * - Rate limits: 15 requests/minute, 1500 requests/day
+ * - Strategy: Use FEWER chunks to minimize API calls
+ *
  * @param {number} targetLength - Target character count
  * @returns {Object} Chunk configuration
  */
 function getChunkConfig(targetLength) {
-  if (targetLength <= 15000) {
+  // Gemini 2.5 Flash can handle ~32K chars per request (8192 tokens)
+  // Free tier strategy: minimize requests while staying under token limits
+
+  if (targetLength <= 30000) {
+    // Single request - most efficient for free tier
     return { chunks: 1, charsPerChunk: targetLength };
   }
-  if (targetLength <= 45000) {
-    return { chunks: 3, charsPerChunk: Math.ceil(targetLength / 3) };
+  if (targetLength <= 60000) {
+    // Two requests - still very efficient
+    return { chunks: 2, charsPerChunk: Math.ceil(targetLength / 2) };
   }
-  if (targetLength <= 75000) {
-    return { chunks: 5, charsPerChunk: Math.ceil(targetLength / 5) };
-  }
-  // For very long scripts
-  return { chunks: 8, charsPerChunk: Math.ceil(targetLength / 8) };
+  // For very long scripts, use max 3 chunks to conserve free tier quota
+  // Each chunk ~20K-30K chars = within 8K token limit
+  return { chunks: 3, charsPerChunk: Math.ceil(targetLength / 3) };
 }
 
 /**
@@ -157,10 +165,11 @@ IMPORTANT:
 
       console.log(`✅ Chunk ${chunkNum} complete (${chunkText.length} characters)`);
 
-      // Delay between chunks to avoid rate limiting
+      // Delay between chunks to avoid rate limiting (free tier: 15 RPM)
       if (i < config.chunks - 1) {
-        console.log('⏳ Waiting before next chunk...');
-        await new Promise(r => setTimeout(r, 2000)); // 2 second delay
+        const delaySeconds = 5; // 5 seconds = safe for free tier
+        console.log(`⏳ Waiting ${delaySeconds}s before next chunk (rate limit protection)...`);
+        await new Promise(r => setTimeout(r, delaySeconds * 1000));
       }
     }
 
