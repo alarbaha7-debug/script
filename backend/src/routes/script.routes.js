@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { analyzeScript } = require('../services/deepseek.service');
+const { analyzeScript, generatePlot } = require('../services/deepseek.service');
 const { generateScript } = require('../services/gemini.service');
 
 /**
@@ -45,6 +45,45 @@ router.post('/analyze-script', async (req, res) => {
 
   } catch (error) {
     console.error('Analysis route error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/generate-plot
+ * Generates plot details based on title and niche
+ */
+router.post('/generate-plot', async (req, res) => {
+  try {
+    const { title, niche, styleType } = req.body;
+
+    // Validation
+    if (!title || !niche || !styleType) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: title, niche, or styleType'
+      });
+    }
+
+    console.log(`\n🎬 Plot generation request for: "${title}"`);
+    console.log(`   Niche: ${niche}`);
+
+    const plot = await generatePlot({
+      title,
+      niche,
+      styleType
+    });
+
+    res.json({
+      success: true,
+      plot
+    });
+
+  } catch (error) {
+    console.error('Plot generation route error:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -140,6 +179,7 @@ router.get('/test', (req, res) => {
     message: 'FacelessScriptPro API is working!',
     endpoints: {
       analyze: 'POST /api/analyze-script',
+      generatePlot: 'POST /api/generate-plot',
       generate: 'POST /api/generate-script',
       health: 'GET /health'
     }

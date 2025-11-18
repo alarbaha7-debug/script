@@ -48,6 +48,16 @@ export const scriptAPI = {
   },
 
   /**
+   * Generate plot details from title
+   * @param {Object} data - Plot generation data
+   * @returns {Promise}
+   */
+  generatePlot: async (data) => {
+    const response = await api.post('/generate-plot', data);
+    return response.data;
+  },
+
+  /**
    * Generate a script
    * @param {Object} data - Generation data
    * @returns {Promise}

@@ -138,4 +138,80 @@ IMPORTANT: Return ONLY valid JSON, no markdown formatting, no code blocks, just 
   }
 }
 
-module.exports = { analyzeScript };
+/**
+ * Generates plot details based on title and niche
+ * @param {Object} params - Generation parameters
+ * @param {string} params.title - The video title
+ * @param {string} params.niche - The niche category
+ * @param {string} params.styleType - The style type
+ * @returns {Promise<string>} Generated plot details
+ */
+async function generatePlot({ title, niche, styleType }) {
+  try {
+    const prompt = `You are an expert content creator for ${styleType} videos.
+
+Given this video title: "${title}"
+For the niche: ${niche}
+
+Generate a compelling and detailed plot outline for this video. The plot should be engaging, well-structured, and suitable for a faceless YouTube video.
+
+Your plot should include:
+1. Opening hook/introduction
+2. Main storyline or key points
+3. Rising action and key events
+4. Climax or main revelation
+5. Conclusion or takeaway
+
+Write a comprehensive plot description (200-400 words) that a script writer can use to create the full script. Be creative and make it captivating for the ${niche} audience.
+
+Return ONLY the plot description, no additional formatting or explanations.`;
+
+    console.log('🎬 Generating plot details with DeepSeek R1...');
+
+    const response = await axios.post(
+      DEEPSEEK_URL,
+      {
+        model: DEEPSEEK_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert content creator who writes compelling plot outlines for YouTube videos. Always provide detailed, engaging plots.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 1000
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${DEEPSEEK_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://facelessscriptpro.com',
+          'X-Title': 'FacelessScriptPro'
+        },
+        timeout: 30000 // 30 seconds timeout
+      }
+    );
+
+    const plotText = response.data.choices[0].message.content.trim();
+
+    console.log('✅ Plot generation complete!');
+
+    return plotText;
+
+  } catch (error) {
+    console.error('❌ DeepSeek Plot Generation Error:', error.message);
+
+    if (error.response) {
+      console.error('Response error:', error.response.data);
+      throw new Error(`DeepSeek API error: ${error.response.data.error?.message || error.message}`);
+    }
+
+    throw new Error(`Plot generation failed: ${error.message}`);
+  }
+}
+
+module.exports = { analyzeScript, generatePlot };
