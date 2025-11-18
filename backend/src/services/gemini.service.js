@@ -167,7 +167,7 @@ Output only narration text.`;
       console.log(`📝 Generating part ${partNum}/${config.chunks}...`);
 
       const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${userApiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userApiKey}`,
         {
           contents: [{
             parts: [{ text: prompt }]
