@@ -20,15 +20,19 @@ function AppContent() {
           </div>
 
           <div className="mb-6">
-            <div className="bg-blue-50 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-blue-900 mb-2">Features:</h3>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>✅ 20 different niches</li>
-                <li>✅ AI-powered script analysis</li>
-                <li>✅ Generate 10K-100K character scripts</li>
-                <li>✅ Intelligent chunking for long scripts</li>
-                <li>✅ Download & copy functionality</li>
-              </ul>
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-5 mb-6 border border-indigo-100">
+              <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-3">
+                Write Up to 100,000 Characters — Ultra-High Quality
+              </h3>
+              <p className="text-lg font-semibold text-gray-800 mb-2">
+                Ultimate Long-Form Script Engine
+              </p>
+              <p className="text-base font-medium text-indigo-700">
+                The Ultimate AI Story Generator — 10x More Powerful
+              </p>
+              <p className="text-base font-medium text-purple-600 mt-1">
+                Story Generation Without Limits
+              </p>
             </div>
           </div>
 
