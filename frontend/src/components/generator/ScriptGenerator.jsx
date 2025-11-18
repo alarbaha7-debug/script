@@ -82,6 +82,7 @@ export default function ScriptGenerator() {
   const [targetLength, setTargetLength] = useState(30000);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedScript, setGeneratedScript] = useState('');
+  const [generationTimeline, setGenerationTimeline] = useState([]);
 
   // Load templates on mount
   useEffect(() => {
@@ -210,6 +211,7 @@ export default function ScriptGenerator() {
       });
 
       setGeneratedScript(response.script);
+      setGenerationTimeline(response.timeline || []);
       toast.success(`🎉 Script generated! ${response.stats.characterCount} characters`, { id: toastId });
 
     } catch (error) {
@@ -597,6 +599,37 @@ export default function ScriptGenerator() {
                           </>
                         )}
                       </button>
+
+                      {/* Process Timeline */}
+                      {generationTimeline.length > 0 && (
+                        <div className="mt-8 animate-slide-in-up">
+                          <details className="bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-cyan-500/30 overflow-hidden">
+                            <summary className="cursor-pointer p-4 font-bold text-white hover:bg-slate-700/30 transition-all flex items-center gap-3">
+                              <span className="text-2xl">📊</span>
+                              <span className="text-lg">Generation Process Timeline</span>
+                              <span className="text-sm text-cyan-400 ml-auto">Click to expand</span>
+                            </summary>
+                            <div className="p-6 space-y-3 bg-slate-900/30">
+                              {generationTimeline.map((item, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-start gap-4 p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:border-cyan-500/30 transition-all"
+                                >
+                                  <span className="text-cyan-400 font-mono text-sm font-bold min-w-[80px]">
+                                    {item.timestamp}
+                                  </span>
+                                  <div className="flex-1">
+                                    <div className="text-white font-semibold">{item.event}</div>
+                                    {item.details && (
+                                      <div className="text-gray-400 text-sm mt-1">{item.details}</div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        </div>
+                      )}
 
                       {/* Generated Script Output */}
                       {generatedScript && (
