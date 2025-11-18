@@ -16,55 +16,74 @@ async function analyzeTemplate({ exampleScript, category, niche, userApiKey }) {
 CATEGORY: ${category.toUpperCase()} (Emotional / Horror / Mystery / Adventure / Educational)
 NICHE: ${niche}
 
-TASK: Read the entire script and output a detailed YOUTUBE STYLE PROFILE for this category and niche.
+TASK: Analyze this script deeply and create a DETAILED STYLE PROFILE that can be used to generate new scripts in the same style.
 
-Focus on VIDEO SCRIPT ELEMENTS ONLY:
+Output your analysis in the following STRUCTURED FORMAT (use this exact structure):
 
-HOOK ANALYSIS:
-- How the script opens
-- What makes the first lines attention-grabbing
-- Specific hook technique used
+HOOK STYLE:
+- How the opening grabs attention
+- Pace of the first 3-6 lines
+- What emotional/suspense "trigger" is used
+- How quickly mystery/problem is introduced
 
 PACING & RETENTION:
-- Sentence length patterns
-- Suspense beats and how tension rises
-- Use of cliffhangers / teasing future info
+- Average sentence length style
+- Rhythm (fast → slow → fast)
+- How often suspense beats appear
+- How cliffhangers are used
+- How questions/unknowns are dropped
 
-NARRATION STYLE:
-- Tone and voice (dramatic, calm, creepy, emotional, etc.)
-- How information is revealed over time
-- Emotional narration patterns
+NARRATION VOICE:
+- Tone (emotional/dark/cold/dramatic/calm)
+- POV (first-person, third-person narrator)
+- Level of narrator personality
+- How the narrator reacts to events
+- Emotional intensity level
 
-STORY STRUCTURE:
-- How scenes/segments are divided
-- How transitions happen
-- Any time jumps / flashbacks / teaser endings
+STORY STRUCTURE PATTERNS:
+- How scenes are divided
+- Typical scene order (hook → setup → rising tension → reveal → twist)
+- Transitional language used (e.g. "But then..." "However...")
+- Use of flashbacks/time jumps
 
-DIALOGUE & VOICE LINES:
-- How dialogue or quotes are introduced
-- How reactions or thoughts are expressed
+DIALOGUE STYLE:
+- How direct quotes are introduced
+- Dialogue frequency
+- Short or long lines
+- Emotional weight of dialogue
 
 DESCRIPTIVE STYLE:
-- Level of visual detail
-- Level of emotional detail
+- Visual focus (how places, faces, actions described)
+- Emotional focus (fear, sadness, shock, adrenaline)
+- Sensory details (sounds, temperature, physical sensations)
 
-ENDINGS:
-- Type of close-out (twist, moral, reflection, impact)
+CATEGORY-SPECIFIC ELEMENTS (${category.toUpperCase()}):
+${category.toLowerCase() === 'horror' ? '- Atmosphere, dread, tension spikes, fear moments' : ''}
+${category.toLowerCase() === 'emotional' ? '- Introspection, feelings, memories, soft pacing' : ''}
+${category.toLowerCase() === 'mystery' ? '- Clues, misleading details, slow revelations' : ''}
+${category.toLowerCase() === 'adventure' ? '- Movement, new locations, risk' : ''}
+${category.toLowerCase() === 'educational' ? '- Facts blended with storytelling' : ''}
+- Identify and describe how this category's unique elements appear in the script
 
-Return a concise style profile (200-300 words) that captures:
-1. Opening hook technique specific to ${category}
-2. Core tone and pacing
-3. Key sentence patterns
-4. How tension/interest builds
-5. Narrative approach
-6. Unique stylistic elements for ${niche}
+NICHE-SPECIFIC ELEMENTS (${niche}):
+- Unique patterns specific to ${niche} content
+- How the niche's themes are woven into narration
+- Specific terminology or jargon used
 
-IMPORTANT: Keep the profile SHORT and actionable. It will be used to generate new scripts.
+ENDING STYLE:
+- Type of ending (twist/reflection/moral/shock/quiet fade-out)
+- How the story lands emotionally
+- What the final line usually does to the viewer
 
 SCRIPT TO ANALYZE:
 ${exampleScript}
 
-Output ONLY the style profile text, no markdown, no extra formatting.`;
+IMPORTANT:
+- Be specific and detailed in each section
+- Use concrete examples from the script
+- Keep descriptions clear and actionable
+- This profile will be used to generate NEW scripts in the same style
+- Output ONLY the style profile, no markdown code blocks, no extra formatting`;
 
     console.log(`🎬 Analyzing ${category} / ${niche} template with Gemini 2.5 Flash...`);
 
@@ -78,7 +97,7 @@ Output ONLY the style profile text, no markdown, no extra formatting.`;
           temperature: 0.4, // Lower temperature for consistent analysis
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 2048,
+          maxOutputTokens: 4096, // Increased for detailed style profile
           candidateCount: 1
         },
         safetySettings: [

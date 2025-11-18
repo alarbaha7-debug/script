@@ -257,7 +257,7 @@ router.post('/create-template', async (req, res) => {
  */
 router.post('/generate-from-template', async (req, res) => {
   try {
-    const { templateId, template, title, plotDetails, targetCharacters, userApiKey } = req.body;
+    const { templateId, template, title, niche, plotDetails, targetCharacters, userApiKey } = req.body;
 
     // Validation
     if (!template && !templateId) {
@@ -271,13 +271,6 @@ router.post('/generate-from-template', async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'Video title is required'
-      });
-    }
-
-    if (!plotDetails || !plotDetails.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Plot details are required'
       });
     }
 
@@ -299,18 +292,26 @@ router.post('/generate-from-template', async (req, res) => {
       });
     }
 
+    // Use provided niche or fallback to template's niche
+    const finalNiche = niche && niche.trim() ? niche.trim() : templateData.niche;
+
+    // Use provided plot or auto-generate from title
+    const finalPlot = plotDetails && plotDetails.trim()
+      ? plotDetails.trim()
+      : `A ${templateData.category} story about: ${title}`;
+
     console.log(`\n📥 Script generation from template: "${templateData.name}"`);
     console.log(`   Title: "${title}"`);
     console.log(`   Category: ${templateData.category}`);
-    console.log(`   Niche: ${templateData.niche}`);
+    console.log(`   Niche: ${finalNiche}`);
     console.log(`   Target: ${targetCharacters || 30000} characters`);
 
     const result = await generateScript({
       styleProfile: templateData.styleProfile,
       category: templateData.category,
-      niche: templateData.niche,
+      niche: finalNiche,
       title: title.trim(),
-      plotDetails: plotDetails.trim(),
+      plotDetails: finalPlot,
       targetCharacters: targetCharacters || 30000,
       userApiKey
     });

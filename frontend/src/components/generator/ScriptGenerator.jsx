@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { scriptAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Sparkles, Zap, Film, Save, Wand2, Play, Download, Copy } from 'lucide-react';
+import { Sparkles, Zap, Film, Save, Wand2, Play, Download, Copy, Trash2, CheckCircle } from 'lucide-react';
 
 // Categories with emojis and colors
 const CATEGORIES = [
@@ -22,6 +22,43 @@ const NICHES_BY_CATEGORY = {
   educational: ['History', 'Science', 'Technology', 'Psychology', 'Philosophy']
 };
 
+// LocalStorage keys
+const TEMPLATES_STORAGE_KEY = 'facelessscriptpro_templates';
+
+// Template storage functions
+const saveTemplateToStorage = (template) => {
+  try {
+    const templates = JSON.parse(localStorage.getItem(TEMPLATES_STORAGE_KEY) || '[]');
+    templates.push(template);
+    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+    return true;
+  } catch (error) {
+    console.error('Failed to save template:', error);
+    return false;
+  }
+};
+
+const getTemplatesFromStorage = () => {
+  try {
+    return JSON.parse(localStorage.getItem(TEMPLATES_STORAGE_KEY) || '[]');
+  } catch (error) {
+    console.error('Failed to load templates:', error);
+    return [];
+  }
+};
+
+const deleteTemplateFromStorage = (templateId) => {
+  try {
+    const templates = JSON.parse(localStorage.getItem(TEMPLATES_STORAGE_KEY) || '[]');
+    const filtered = templates.filter(t => t.id !== templateId);
+    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(filtered));
+    return true;
+  } catch (error) {
+    console.error('Failed to delete template:', error);
+    return false;
+  }
+};
+
 export default function ScriptGenerator() {
   const { geminiApiKey } = useAuth();
 
@@ -33,14 +70,24 @@ export default function ScriptGenerator() {
   const [templateName, setTemplateName] = useState('');
   const [exampleScript, setExampleScript] = useState('');
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
-  const [createdTemplate, setCreatedTemplate] = useState(null);
+
+  // Template management
+  const [savedTemplates, setSavedTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   // Generation state
+  const [genNiche, setGenNiche] = useState('');
   const [title, setTitle] = useState('');
   const [plotDetails, setPlotDetails] = useState('');
   const [targetLength, setTargetLength] = useState(30000);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedScript, setGeneratedScript] = useState('');
+
+  // Load templates on mount
+  useEffect(() => {
+    const templates = getTemplatesFromStorage();
+    setSavedTemplates(templates);
+  }, []);
 
   const finalNiche = customNiche || selectedNiche;
 
@@ -84,8 +131,16 @@ export default function ScriptGenerator() {
         userApiKey: geminiApiKey
       });
 
-      setCreatedTemplate(response.template);
-      toast.success('✨ Template created successfully!', { id: toastId });
+      // Save template to localStorage
+      const saved = saveTemplateToStorage(response.template);
+      if (saved) {
+        // Reload templates
+        const templates = getTemplatesFromStorage();
+        setSavedTemplates(templates);
+        toast.success('✨ Template created and saved!', { id: toastId });
+      } else {
+        toast.success('✨ Template created!', { id: toastId });
+      }
 
       // Reset form
       setTemplateName('');
@@ -105,17 +160,35 @@ export default function ScriptGenerator() {
     }
   };
 
+  const handleDeleteTemplate = (templateId) => {
+    if (window.confirm('Are you sure you want to delete this template?')) {
+      const deleted = deleteTemplateFromStorage(templateId);
+      if (deleted) {
+        const templates = getTemplatesFromStorage();
+        setSavedTemplates(templates);
+        if (selectedTemplate?.id === templateId) {
+          setSelectedTemplate(null);
+        }
+        toast.success('Template deleted');
+      } else {
+        toast.error('Failed to delete template');
+      }
+    }
+  };
+
+  const handleSelectTemplate = (template) => {
+    setSelectedTemplate(template);
+    setGenNiche(template.niche);
+    toast.success(`Template "${template.name}" selected`);
+  };
+
   const handleGenerateScript = async () => {
-    if (!createdTemplate) {
-      toast.error('Please create a template first');
+    if (!selectedTemplate) {
+      toast.error('Please select a template first');
       return;
     }
     if (!title.trim()) {
       toast.error('Please enter a video title');
-      return;
-    }
-    if (!plotDetails.trim()) {
-      toast.error('Please enter plot details');
       return;
     }
     if (!geminiApiKey) {
@@ -128,9 +201,10 @@ export default function ScriptGenerator() {
 
     try {
       const response = await scriptAPI.generateFromTemplate({
-        template: createdTemplate,
+        template: selectedTemplate,
         title: title.trim(),
-        plotDetails: plotDetails.trim(),
+        niche: genNiche.trim() || selectedTemplate.niche,
+        plotDetails: plotDetails.trim() || `A ${selectedTemplate.category} story about: ${title}`,
         targetCharacters: targetLength,
         userApiKey: geminiApiKey
       });
@@ -368,10 +442,10 @@ export default function ScriptGenerator() {
                 Generate Script from Template
               </h2>
 
-              {!createdTemplate ? (
+              {savedTemplates.length === 0 ? (
                 <div className="text-center py-16 animate-fade-in">
                   <Film className="w-24 h-24 text-gray-500 mx-auto mb-6 animate-pulse" />
-                  <p className="text-xl text-gray-400 mb-4">No template created yet</p>
+                  <p className="text-xl text-gray-400 mb-4">No templates saved yet</p>
                   <p className="text-gray-500 mb-8">Create a template first to start generating scripts</p>
                   <button
                     onClick={() => setActiveTab('create')}
@@ -382,112 +456,171 @@ export default function ScriptGenerator() {
                 </div>
               ) : (
                 <div className="space-y-8">
-                  {/* Template Info */}
-                  <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/40 rounded-2xl p-6 animate-fade-in">
-                    <h3 className="text-xl font-bold text-white mb-3">📋 Active Template</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-400">Name:</span>
-                        <span className="text-white font-semibold ml-2">{createdTemplate.name}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">Category:</span>
-                        <span className="text-white font-semibold ml-2 capitalize">{createdTemplate.category}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">Niche:</span>
-                        <span className="text-white font-semibold ml-2">{createdTemplate.niche}</span>
-                      </div>
+                  {/* Template Selection */}
+                  <div className="animate-fade-in">
+                    <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                      📚 Your Templates ({savedTemplates.length})
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {savedTemplates.map((template, idx) => {
+                        const categoryData = CATEGORIES.find(c => c.id === template.category);
+                        const isSelected = selectedTemplate?.id === template.id;
+                        return (
+                          <div
+                            key={template.id}
+                            onClick={() => handleSelectTemplate(template)}
+                            style={{ animationDelay: `${idx * 100}ms` }}
+                            className={`group relative overflow-hidden rounded-3xl p-6 transition-all duration-500 cursor-pointer animate-fade-in-up ${
+                              isSelected
+                                ? `bg-gradient-to-br ${categoryData?.color || 'from-blue-500 to-cyan-500'} shadow-2xl scale-105 border-4 border-white/20`
+                                : 'bg-slate-700/50 hover:bg-slate-700 border-2 border-blue-500/30 hover:border-blue-500/60 hover:scale-105'
+                            }`}
+                          >
+                            {/* Shimmer effect when selected */}
+                            {isSelected && (
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                            )}
+
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="text-4xl">{categoryData?.emoji || '📄'}</div>
+                                <div>
+                                  <h4 className="text-xl font-bold text-white mb-1">{template.name}</h4>
+                                  <p className="text-sm text-gray-200 capitalize">{template.category} • {template.niche}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                {isSelected && (
+                                  <CheckCircle className="w-8 h-8 text-green-300 animate-pulse" />
+                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteTemplate(template.id);
+                                  }}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg"
+                                >
+                                  <Trash2 className="w-5 h-5 text-red-300" />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-300">
+                              Created: {new Date(template.createdAt).toLocaleDateString()}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Title Input */}
-                  <div className="animate-fade-in delay-100">
-                    <label className="block text-white font-bold mb-3 text-lg">🎬 Video Title *</label>
-                    <input
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="e.g., The Haunting of Hill House: True Story"
-                      className="w-full bg-slate-900/50 border-2 border-blue-500/40 rounded-2xl px-6 py-4 text-white text-lg placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-300"
-                    />
-                  </div>
+                  {/* Generation Form (only show if template selected) */}
+                  {selectedTemplate && (
+                    <div className="space-y-6 animate-slide-in-up">
+                      <div className="h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
 
-                  {/* Plot Details */}
-                  <div className="animate-fade-in delay-200">
-                    <label className="block text-white font-bold mb-3 text-lg">📖 Plot Details *</label>
-                    <textarea
-                      value={plotDetails}
-                      onChange={(e) => setPlotDetails(e.target.value)}
-                      placeholder="Describe the main plot, key events, and story arc..."
-                      rows={8}
-                      className="w-full bg-slate-900/50 border-2 border-blue-500/40 rounded-2xl px-6 py-4 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none resize-none transition-all duration-300"
-                    />
-                  </div>
-
-                  {/* Target Length */}
-                  <div className="animate-fade-in delay-300">
-                    <label className="block text-white font-bold mb-3 text-lg">📏 Target Length: {targetLength.toLocaleString()} characters</label>
-                    <input
-                      type="range"
-                      min="10000"
-                      max="100000"
-                      step="5000"
-                      value={targetLength}
-                      onChange={(e) => setTargetLength(parseInt(e.target.value))}
-                      className="w-full h-3 bg-slate-700 rounded-full appearance-none cursor-pointer accent-blue-500"
-                    />
-                    <div className="flex justify-between text-sm text-gray-400 mt-2">
-                      <span>10K (short)</span>
-                      <span>55K (medium)</span>
-                      <span>100K (long)</span>
-                    </div>
-                  </div>
-
-                  {/* Generate Button */}
-                  <button
-                    onClick={handleGenerateScript}
-                    disabled={isGenerating}
-                    className={`w-full py-6 rounded-3xl font-bold text-2xl transition-all duration-500 flex items-center justify-center gap-4 ${
-                      isGenerating
-                        ? 'bg-gray-600 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 hover:from-blue-500 hover:via-cyan-500 hover:to-blue-500 text-white shadow-2xl hover:shadow-blue-500/60 transform hover:scale-105 active:scale-95 animate-gradient-x'
-                    }`}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Generating Script...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-8 h-8 animate-bounce-slow" />
-                        Generate Script with Gemini 2.5 Flash
-                      </>
-                    )}
-                  </button>
-
-                  {/* Generated Script Output */}
-                  {generatedScript && (
-                    <div className="mt-8 animate-slide-in-up">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-2xl font-bold text-white">✨ Your Generated Script</h3>
-                        <button
-                          onClick={copyToClipboard}
-                          className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
-                        >
-                          <Copy className="w-5 h-5" />
-                          Copy
-                        </button>
+                      {/* Niche Input (Optional) */}
+                      <div className="animate-fade-in delay-100">
+                        <label className="block text-white font-bold mb-3 text-lg">🎯 Niche (Optional)</label>
+                        <input
+                          type="text"
+                          value={genNiche}
+                          onChange={(e) => setGenNiche(e.target.value)}
+                          placeholder={`Default: ${selectedTemplate.niche}`}
+                          className="w-full bg-slate-900/50 border-2 border-blue-500/40 rounded-2xl px-6 py-4 text-white text-lg placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-300"
+                        />
+                        <p className="text-sm text-gray-400 mt-2">Leave empty to use template's niche: {selectedTemplate.niche}</p>
                       </div>
-                      <div className="bg-slate-900/50 border-2 border-green-500/40 rounded-2xl p-6 max-h-96 overflow-y-auto">
-                        <pre className="text-white whitespace-pre-wrap font-mono text-sm leading-relaxed">
-                          {generatedScript}
-                        </pre>
+
+                      {/* Title Input */}
+                      <div className="animate-fade-in delay-200">
+                        <label className="block text-white font-bold mb-3 text-lg">🎬 Video Title *</label>
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          placeholder="e.g., The Haunting of Hill House: True Story"
+                          className="w-full bg-slate-900/50 border-2 border-blue-500/40 rounded-2xl px-6 py-4 text-white text-lg placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-300"
+                        />
                       </div>
-                      <div className="mt-4 text-center text-sm text-gray-400">
-                        {generatedScript.length.toLocaleString()} characters • {Math.round(generatedScript.length / 5).toLocaleString()} words
+
+                      {/* Plot Details (Optional) */}
+                      <div className="animate-fade-in delay-300">
+                        <label className="block text-white font-bold mb-3 text-lg">📖 Plot Details (Optional)</label>
+                        <textarea
+                          value={plotDetails}
+                          onChange={(e) => setPlotDetails(e.target.value)}
+                          placeholder="Describe the main plot, key events, and story arc... (Optional)"
+                          rows={6}
+                          className="w-full bg-slate-900/50 border-2 border-blue-500/40 rounded-2xl px-6 py-4 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none resize-none transition-all duration-300"
+                        />
+                        <p className="text-sm text-gray-400 mt-2">Leave empty for auto-generated plot based on title</p>
                       </div>
+
+                      {/* Target Length */}
+                      <div className="animate-fade-in delay-400">
+                        <label className="block text-white font-bold mb-3 text-lg">📏 Target Length: {targetLength.toLocaleString()} characters</label>
+                        <input
+                          type="range"
+                          min="10000"
+                          max="100000"
+                          step="5000"
+                          value={targetLength}
+                          onChange={(e) => setTargetLength(parseInt(e.target.value))}
+                          className="w-full h-3 bg-slate-700 rounded-full appearance-none cursor-pointer accent-blue-500"
+                        />
+                        <div className="flex justify-between text-sm text-gray-400 mt-2">
+                          <span>10K (short)</span>
+                          <span>55K (medium)</span>
+                          <span>100K (long)</span>
+                        </div>
+                      </div>
+
+                      {/* Generate Button */}
+                      <button
+                        onClick={handleGenerateScript}
+                        disabled={isGenerating}
+                        className={`w-full py-6 rounded-3xl font-bold text-2xl transition-all duration-500 flex items-center justify-center gap-4 ${
+                          isGenerating
+                            ? 'bg-gray-600 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 hover:from-blue-500 hover:via-cyan-500 hover:to-blue-500 text-white shadow-2xl hover:shadow-blue-500/60 transform hover:scale-105 active:scale-95 animate-gradient-x'
+                        }`}
+                      >
+                        {isGenerating ? (
+                          <>
+                            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Generating Script...
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-8 h-8 animate-bounce-slow" />
+                            Generate Script with Gemini 2.5 Flash
+                          </>
+                        )}
+                      </button>
+
+                      {/* Generated Script Output */}
+                      {generatedScript && (
+                        <div className="mt-8 animate-slide-in-up">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-2xl font-bold text-white">✨ Your Generated Script</h3>
+                            <button
+                              onClick={copyToClipboard}
+                              className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                            >
+                              <Copy className="w-5 h-5" />
+                              Copy
+                            </button>
+                          </div>
+                          <div className="bg-slate-900/50 border-2 border-green-500/40 rounded-2xl p-6 max-h-96 overflow-y-auto">
+                            <pre className="text-white whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                              {generatedScript}
+                            </pre>
+                          </div>
+                          <div className="mt-4 text-center text-sm text-gray-400">
+                            {generatedScript.length.toLocaleString()} characters • {Math.round(generatedScript.length / 5).toLocaleString()} words
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
