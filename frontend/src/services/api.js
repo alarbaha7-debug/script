@@ -38,36 +38,6 @@ api.interceptors.response.use(
 // API Methods
 export const scriptAPI = {
   /**
-   * Analyze a script example
-   * @param {Object} data - Analysis data
-   * @returns {Promise}
-   */
-  analyzeScript: async (data) => {
-    const response = await api.post('/analyze-script', data);
-    return response.data;
-  },
-
-  /**
-   * Generate plot details from title
-   * @param {Object} data - Plot generation data
-   * @returns {Promise}
-   */
-  generatePlot: async (data) => {
-    const response = await api.post('/generate-plot', data);
-    return response.data;
-  },
-
-  /**
-   * Generate a script
-   * @param {Object} data - Generation data
-   * @returns {Promise}
-   */
-  generateScript: async (data) => {
-    const response = await api.post('/generate-script', data);
-    return response.data;
-  },
-
-  /**
    * Create a template from example script
    * @param {Object} data - Template creation data (templateName, category, niche, exampleScript, userApiKey)
    * @returns {Promise}
@@ -79,7 +49,7 @@ export const scriptAPI = {
 
   /**
    * Generate script from template
-   * @param {Object} data - Generation data (templateId, title, plotDetails, targetCharacters, userApiKey)
+   * @param {Object} data - Generation data (template, title, niche, plotDetails, targetCharacters, userApiKey)
    * @returns {Promise}
    */
   generateFromTemplate: async (data) => {
