@@ -68,6 +68,35 @@ export const scriptAPI = {
   },
 
   /**
+   * Create a template from example script
+   * @param {Object} data - Template creation data (templateName, category, niche, exampleScript, userApiKey)
+   * @returns {Promise}
+   */
+  createTemplate: async (data) => {
+    const response = await api.post('/create-template', data);
+    return response.data;
+  },
+
+  /**
+   * Generate script from template
+   * @param {Object} data - Generation data (templateId, title, plotDetails, targetCharacters, userApiKey)
+   * @returns {Promise}
+   */
+  generateFromTemplate: async (data) => {
+    const response = await api.post('/generate-from-template', data);
+    return response.data;
+  },
+
+  /**
+   * Get user's templates
+   * @returns {Promise}
+   */
+  getTemplates: async () => {
+    const response = await api.get('/templates');
+    return response.data;
+  },
+
+  /**
    * Test API connection
    * @returns {Promise}
    */
