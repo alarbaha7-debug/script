@@ -57,17 +57,34 @@ function extractTailContext(previousChunk) {
 }
 
 /**
+ * Gets category-specific hook instructions
+ * @param {string} category - Category type
+ * @returns {string} Hook instructions for the category
+ */
+function getCategoryHookInstructions(category) {
+  const hookMap = {
+    emotional: 'Start with a DEEP EMOTIONAL HOOK that triggers empathy, sadness, or inspiration. Make the audience FEEL something immediately.',
+    horror: 'Start with a CREEPY, UNSETTLING HOOK that creates curiosity about danger or the unknown. Build dread from the first line.',
+    mystery: 'Start with a BIG QUESTION, strange detail, or unsolved event. Create immediate curiosity that demands answers.',
+    adventure: 'Start with a sense of JOURNEY, RISK, or entering a new world. Make the audience feel the thrill of discovery.',
+    educational: 'Start with a SHOCKING FACT, surprising lesson, or mind-blowing statistic. Challenge what the audience thinks they know.'
+  };
+
+  return hookMap[category.toLowerCase()] || hookMap.educational;
+}
+
+/**
  * Generates a script using Gemini 2.5 Flash with intelligent chunking
+ * NOW WITH CATEGORY + NICHE AWARENESS
  * @param {Object} params - Generation parameters
  * @returns {Promise<Object>} Generated script and stats
  */
 async function generateScript({
-  analysis,
-  title,
+  styleProfile,
+  category,
   niche,
-  styleType,
+  title,
   plotDetails,
-  extraInstructions,
   targetCharacters,
   userApiKey
 }) {
@@ -78,10 +95,12 @@ async function generateScript({
 
     const config = getChunkConfig(targetCharacters);
     const chunks = [];
-    const masterPrompt = analysis.master_prompt;
 
-    console.log(`🎬 Generating script in ${config.chunks} chunk(s)...`);
+    console.log(`🎬 Generating ${category} / ${niche} script in ${config.chunks} chunk(s)...`);
     console.log(`📊 Target: ${targetCharacters} characters (${Math.round(targetCharacters / 5)} words)`);
+
+    // Get category-specific hook instructions
+    const hookInstructions = getCategoryHookInstructions(category);
 
     const startTime = Date.now();
 
@@ -90,34 +109,59 @@ async function generateScript({
       let prompt = '';
 
       if (i === 0) {
-        // FIRST CHUNK: Concise prompt to save input tokens
-        prompt = `${masterPrompt}
+        // FIRST CHUNK: Category-aware with style profile
+        prompt = `Write PART ${partNum}/${config.chunks} of a long YouTube narration script.
 
-SCRIPT:
+CATEGORY: ${category.toUpperCase()}
+NICHE: ${niche}
+
+YOUTUBE STYLE PROFILE:
+${styleProfile}
+
+SCRIPT DETAILS:
 Title: ${title}
-Niche: ${niche}
-Style: ${styleType}
 Plot: ${plotDetails}
 
-TASK (Part ${partNum}/${config.chunks}):
+TASK (Part ${partNum}/${config.chunks}, ${config.charsPerChunk} chars):
 ${config.chunks === 1
-  ? `Write complete ${config.charsPerChunk}-char script.`
-  : `Write OPENING (${config.charsPerChunk} chars): Hook, setup, build tension, end naturally.`}
+  ? `Write the COMPLETE script from beginning to end.`
+  : `Write the OPENING section.`}
 
-RULES: Match analyzed style exactly. ${config.charsPerChunk}±${Math.floor(config.buffer/2)} chars. No meta-text.`;
+RULES FOR ${category.toUpperCase()} CATEGORY:
+${hookInstructions}
+
+Use short, spoken-style sentences.
+Add suspense/curiosity every few lines.
+Mix visual description with emotional reactions.
+No rambling; every line should move the story or teach something.
+Use cliffhangers or teaser lines to keep viewers watching.
+Sound like a narrator talking to the audience.
+
+LENGTH: ${config.charsPerChunk}±${Math.floor(config.buffer/2)} characters.
+
+Output only the narration text (no headings, no meta-text).`;
 
       } else {
-        // CONTINUATION CHUNKS: Concise with context
+        // CONTINUATION CHUNKS: Category-aware with context
         const previousContext = extractTailContext(chunks[i - 1]);
 
-        prompt = `Continue ${styleType} script. Previous ended: "${previousContext}"
+        prompt = `Continue ${category} / ${niche} YouTube script. Previous part ended:
+"${previousContext}"
+
+CATEGORY: ${category.toUpperCase()}
+NICHE: ${niche}
 
 TASK (Part ${partNum}/${config.chunks}, ${config.charsPerChunk} chars):
 ${partNum === config.chunks
-  ? `FINAL: Build climax, resolve conflict, conclude.`
-  : `MIDDLE: Continue story, build tension, natural transition.`}
+  ? `This is the FINAL part. Build to climax, resolve conflict, provide satisfying ${category} conclusion.`
+  : `This is a MIDDLE section. Continue building tension, develop story, natural transition.`}
 
-RULES: Continue directly. Same style/tone. No "meanwhile". ${config.charsPerChunk}±${Math.floor(config.buffer/2)} chars. No meta-text.`;
+RULES:
+Continue DIRECTLY where previous part ended (no gap, no repetition).
+Maintain SAME ${category} tone and style.
+NO meta phrases like "meanwhile" or "as we saw".
+${config.charsPerChunk}±${Math.floor(config.buffer/2)} characters.
+Output only narration text.`;
       }
 
       console.log(`📝 Generating part ${partNum}/${config.chunks}...`);
