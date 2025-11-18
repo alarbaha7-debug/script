@@ -34,14 +34,13 @@ function AppContent() {
         {/* Login Card */}
         <div className="relative max-w-md w-full bg-slate-800/60 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-purple-500/20 p-10 border border-purple-500/30 animate-fade-in-up">
           <div className="text-center mb-8 animate-fade-in-down">
-            <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="flex items-center justify-center gap-3 mb-6">
               <Sparkles className="w-12 h-12 text-purple-400 animate-spin-slow" />
               <h1 className="text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-gradient-x">
                 FacelessScriptPro
               </h1>
               <Sparkles className="w-12 h-12 text-pink-400 animate-spin-slow-reverse" />
             </div>
-            <p className="text-xl text-gray-200 font-medium animate-pulse-slow">AI-Powered Script Generator</p>
           </div>
 
           <div className="mb-8 animate-slide-in-up">
@@ -186,7 +185,6 @@ function AppContent() {
                   FacelessScriptPro
                 </h1>
               </div>
-              <p className="text-sm text-gray-300 mt-1">AI-Powered Script Generator with Gemini 2.5 Flash</p>
             </div>
 
             <div className="flex items-center gap-4 animate-slide-in-left">
@@ -226,13 +224,6 @@ function AppContent() {
       <footer className="relative bg-slate-800/40 backdrop-blur-2xl border-t border-purple-500/30 mt-12">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-              <p className="text-sm font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Powered by Gemini 2.5 Flash
-              </p>
-              <Sparkles className="w-5 h-5 text-pink-400" />
-            </div>
             <p className="text-sm text-gray-400">
               &copy; 2025 FacelessScriptPro. All rights reserved.
             </p>
