@@ -5,29 +5,34 @@ const DEEPSEEK_URL = process.env.DEEPSEEK_URL || 'https://openrouter.ai/api/v1/c
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek/deepseek-r1:free';
 
 /**
- * Analyzes a script example and generates a master prompt
+ * Analyzes a script example and generates a master prompt with Category + Niche awareness
  * @param {Object} params - Analysis parameters
  * @param {string} params.scriptExample - The example script to analyze
- * @param {string} params.niche - The niche category
+ * @param {string} params.category - Content category (Emotional/Horror/Mystery/Adventure/Educational)
+ * @param {string} params.niche - The niche (True Crime, Paranormal, etc.)
  * @param {string} params.styleType - The style type
  * @param {string} params.title - The new script title
  * @param {string} params.plotDetails - Plot details for the new script
  * @returns {Promise<Object>} Analysis result with master prompt
  */
-async function analyzeScript({ scriptExample, niche, styleType, title, plotDetails }) {
+async function analyzeScript({ scriptExample, category, niche, styleType, title, plotDetails }) {
   try {
-    const prompt = `You are an expert script analyst for ${styleType} content.
+    const prompt = `You are analyzing a LONG YouTube narration script.
+
+CATEGORY: ${category} (Emotional / Horror / Mystery / Adventure / Educational)
+NICHE: ${niche}
 
 SCRIPT EXAMPLE TO ANALYZE:
 ${scriptExample}
 
 NEW SCRIPT DETAILS:
 - Title: ${title}
+- Category: ${category}
 - Niche: ${niche}
 - Style Type: ${styleType}
 - Plot: ${plotDetails}
 
-Your task is to analyze the script example and extract key patterns that will be used to generate a new script.
+TASK: Analyze this script focusing on VIDEO SCRIPT ELEMENTS for ${category} category and ${niche} niche.
 
 Analyze this script deeply and return a JSON object with the following structure:
 {
