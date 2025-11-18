@@ -106,16 +106,16 @@ async function generateScript({
     // Helper function to format timestamp
     const formatTime = () => new Date().toLocaleTimeString('en-US', { hour12: false });
 
-    // Helper function to add timeline event
-    const addTimelineEvent = (event, details = '') => {
+    // Helper function to add timeline event with progress percentage
+    const addTimelineEvent = (event, details = '', progress = null) => {
       const timestamp = formatTime();
       const message = details ? `${event} - ${details}` : event;
-      timeline.push({ timestamp, event, details });
-      console.log(`[${timestamp}] ${message}`);
+      timeline.push({ timestamp, event, details, progress });
+      console.log(`[${timestamp}] ${progress !== null ? `[${progress}%] ` : ''}${message}`);
     };
 
-    addTimelineEvent('🎬 Script generation started', `${category} / ${niche}`);
-    addTimelineEvent('📊 Configuration', `Target: ${targetCharacters} characters (${config.chunks} chunks)`);
+    addTimelineEvent('🎬 Script generation started', `${category} / ${niche}`, 10);
+    addTimelineEvent('📊 Configuration', `Target: ${targetCharacters} characters (${config.chunks} chunks)`, 10);
 
     // Get category-specific hook instructions
     const hookInstructions = getCategoryHookInstructions(category);
@@ -182,7 +182,9 @@ ${config.charsPerChunk}±${Math.floor(config.buffer/2)} characters.
 Output only narration text.`;
       }
 
-      addTimelineEvent(`📝 Generating part ${partNum}/${config.chunks}`, 'Calling Gemini API...');
+      // Calculate progress: 10% start + 80% for generation (spread across chunks) + 10% finalization
+      const chunkProgress = 10 + Math.round((i / config.chunks) * 80);
+      addTimelineEvent(`📝 Generating part ${partNum}/${config.chunks}`, 'Calling Gemini API...', chunkProgress);
 
       const chunkStartTime = Date.now();
       const response = await axios.post(
@@ -268,12 +270,13 @@ Output only narration text.`;
       chunks.push(chunkText);
 
       const chunkDuration = Math.round((Date.now() - chunkStartTime) / 1000);
-      addTimelineEvent(`✅ Part ${partNum}/${config.chunks} complete`, `${chunkText.length} characters in ${chunkDuration}s`);
+      const completeProgress = 10 + Math.round(((i + 1) / config.chunks) * 80);
+      addTimelineEvent(`✅ Part ${partNum}/${config.chunks} complete`, `${chunkText.length} characters in ${chunkDuration}s`, completeProgress);
 
       // Delay between chunks to avoid rate limiting (free tier: 15 RPM)
       if (i < config.chunks - 1) {
         const delaySeconds = 5; // 5 seconds = safe for free tier
-        addTimelineEvent(`⏳ Waiting ${delaySeconds}s`, 'Rate limit protection');
+        addTimelineEvent(`⏳ Waiting ${delaySeconds}s`, 'Rate limit protection', completeProgress);
         await new Promise(r => setTimeout(r, delaySeconds * 1000));
       }
     }
@@ -284,8 +287,8 @@ Output only narration text.`;
     const endTime = Date.now();
     const generationTime = Math.round((endTime - startTime) / 1000);
 
-    addTimelineEvent('🎉 Script generation complete!', `${finalScript.length} characters`);
-    addTimelineEvent('⏱️  Total time', `${generationTime} seconds`);
+    addTimelineEvent('🎉 Script generation complete!', `${finalScript.length} characters`, 100);
+    addTimelineEvent('⏱️  Total time', `${generationTime} seconds`, 100);
 
     return {
       script: finalScript,

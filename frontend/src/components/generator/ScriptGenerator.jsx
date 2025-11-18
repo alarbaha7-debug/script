@@ -227,6 +227,19 @@ export default function ScriptGenerator() {
     toast.success('Script copied to clipboard!');
   };
 
+  const downloadAsTextFile = () => {
+    const blob = new Blob([generatedScript], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${title.trim() || 'script'}_${Date.now()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success('Script downloaded as TXT file!');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden">
       {/* AMAZING ANIMATED BACKGROUND */}
@@ -600,13 +613,35 @@ export default function ScriptGenerator() {
                         )}
                       </button>
 
-                      {/* Process Timeline */}
+                      {/* Process Timeline with Progress */}
                       {generationTimeline.length > 0 && (
-                        <div className="mt-8 animate-slide-in-up">
+                        <div className="mt-8 animate-slide-in-up space-y-4">
+                          {/* Progress Bar */}
+                          <div className="bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-cyan-500/30 p-6">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-white font-bold text-lg">Generation Progress</span>
+                              <span className="text-cyan-400 font-bold text-2xl">
+                                {generationTimeline[generationTimeline.length - 1]?.progress || 0}%
+                              </span>
+                            </div>
+                            <div className="relative w-full h-6 bg-slate-900/50 rounded-full overflow-hidden border border-slate-700/50">
+                              <div
+                                className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 transition-all duration-500 ease-out rounded-full"
+                                style={{ width: `${generationTimeline[generationTimeline.length - 1]?.progress || 0}%` }}
+                              >
+                                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                              </div>
+                            </div>
+                            <div className="mt-2 text-sm text-gray-400 text-center">
+                              {generationTimeline[generationTimeline.length - 1]?.event}
+                            </div>
+                          </div>
+
+                          {/* Timeline Details (Collapsible) */}
                           <details className="bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-cyan-500/30 overflow-hidden">
                             <summary className="cursor-pointer p-4 font-bold text-white hover:bg-slate-700/30 transition-all flex items-center gap-3">
                               <span className="text-2xl">📊</span>
-                              <span className="text-lg">Generation Process Timeline</span>
+                              <span className="text-lg">Detailed Timeline</span>
                               <span className="text-sm text-cyan-400 ml-auto">Click to expand</span>
                             </summary>
                             <div className="p-6 space-y-3 bg-slate-900/30">
@@ -619,7 +654,14 @@ export default function ScriptGenerator() {
                                     {item.timestamp}
                                   </span>
                                   <div className="flex-1">
-                                    <div className="text-white font-semibold">{item.event}</div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-white font-semibold">{item.event}</span>
+                                      {item.progress !== null && item.progress !== undefined && (
+                                        <span className="text-cyan-400 text-xs font-bold bg-cyan-500/10 px-2 py-0.5 rounded-full">
+                                          {item.progress}%
+                                        </span>
+                                      )}
+                                    </div>
                                     {item.details && (
                                       <div className="text-gray-400 text-sm mt-1">{item.details}</div>
                                     )}
@@ -634,15 +676,24 @@ export default function ScriptGenerator() {
                       {/* Generated Script Output */}
                       {generatedScript && (
                         <div className="mt-8 animate-slide-in-up">
-                          <div className="flex justify-between items-center mb-4">
+                          <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
                             <h3 className="text-2xl font-bold text-white">✨ Your Generated Script</h3>
-                            <button
-                              onClick={copyToClipboard}
-                              className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105"
-                            >
-                              <Copy className="w-5 h-5" />
-                              Copy
-                            </button>
+                            <div className="flex gap-3">
+                              <button
+                                onClick={copyToClipboard}
+                                className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-green-500/30"
+                              >
+                                <Copy className="w-5 h-5" />
+                                Copy
+                              </button>
+                              <button
+                                onClick={downloadAsTextFile}
+                                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-blue-500/30"
+                              >
+                                <Download className="w-5 h-5" />
+                                Download TXT
+                              </button>
+                            </div>
                           </div>
                           <div className="bg-slate-900/50 border-2 border-green-500/40 rounded-2xl p-6 max-h-96 overflow-y-auto">
                             <pre className="text-white whitespace-pre-wrap font-mono text-sm leading-relaxed">
