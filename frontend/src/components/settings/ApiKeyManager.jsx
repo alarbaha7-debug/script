@@ -46,7 +46,7 @@ export default function ApiKeyManager() {
           </h4>
           <ol className="text-sm text-gray-200 space-y-2 list-decimal list-inside">
             <li className="animate-fade-in delay-100">
-              Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-purple-300 hover:text-pink-300 underline font-bold transition-colors">Google AI Studio</a>
+              Go to <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer" className="text-purple-300 hover:text-pink-300 underline font-bold transition-colors">Google AI Studio</a>
             </li>
             <li className="animate-fade-in delay-200">Sign in with your Google account</li>
             <li className="animate-fade-in delay-300">Click "Get API key" or "Create API key"</li>
