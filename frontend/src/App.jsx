@@ -11,15 +11,15 @@ function AppContent() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden flex items-center justify-center p-3 sm:p-6">
         {/* AMAZING ANIMATED BACKGROUND */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Animated gradient orbs */}
-          <div className="absolute w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-3xl -top-48 -left-48 animate-float"></div>
-          <div className="absolute w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-3xl top-1/4 -right-64 animate-float-slow"></div>
-          <div className="absolute w-[400px] h-[400px] bg-blue-500/25 rounded-full blur-3xl bottom-0 left-1/3 animate-float-slower"></div>
-          <div className="absolute w-[350px] h-[350px] bg-cyan-400/20 rounded-full blur-3xl top-1/2 right-1/4 animate-pulse-slow"></div>
-          <div className="absolute w-[450px] h-[450px] bg-violet-600/20 rounded-full blur-3xl -bottom-32 -right-32 animate-float"></div>
+          <div className="absolute w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-purple-600/30 rounded-full blur-3xl -top-24 sm:-top-48 -left-24 sm:-left-48 animate-float"></div>
+          <div className="absolute w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-pink-500/20 rounded-full blur-3xl top-1/4 -right-32 sm:-right-64 animate-float-slow"></div>
+          <div className="absolute w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-blue-500/25 rounded-full blur-3xl bottom-0 left-1/3 animate-float-slower"></div>
+          <div className="absolute w-[200px] sm:w-[350px] h-[200px] sm:h-[350px] bg-cyan-400/20 rounded-full blur-3xl top-1/2 right-1/4 animate-pulse-slow"></div>
+          <div className="absolute w-[280px] sm:w-[450px] h-[280px] sm:h-[450px] bg-violet-600/20 rounded-full blur-3xl -bottom-16 sm:-bottom-32 -right-16 sm:-right-32 animate-float"></div>
 
           {/* Gradient mesh overlay */}
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 via-transparent to-blue-900/10"></div>
@@ -32,37 +32,37 @@ function AppContent() {
         </div>
 
         {/* Login Card */}
-        <div className="relative max-w-md w-full bg-slate-800/60 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-purple-500/20 p-10 border border-purple-500/30 animate-fade-in-up">
-          <div className="text-center mb-8 animate-fade-in-down">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <Sparkles className="w-12 h-12 text-purple-400 animate-spin-slow" />
-              <h1 className="text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-gradient-x">
+        <div className="relative max-w-md w-full bg-slate-800/60 backdrop-blur-2xl rounded-2xl sm:rounded-3xl shadow-2xl shadow-purple-500/20 p-6 sm:p-10 border border-purple-500/30 animate-fade-in-up">
+          <div className="text-center mb-6 sm:mb-8 animate-fade-in-down">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-purple-400 animate-spin-slow" />
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-gradient-x">
                 FacelessScriptPro
               </h1>
-              <Sparkles className="w-12 h-12 text-pink-400 animate-spin-slow-reverse" />
+              <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-pink-400 animate-spin-slow-reverse" />
             </div>
           </div>
 
-          <div className="mb-8 animate-slide-in-up">
-            <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 backdrop-blur-xl rounded-2xl p-6 border border-purple-500/30 shadow-xl">
-              <h3 className="font-bold text-white mb-4 text-lg flex items-center gap-2">
+          <div className="mb-6 sm:mb-8 animate-slide-in-up">
+            <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-purple-500/30 shadow-xl">
+              <h3 className="font-bold text-white mb-3 sm:mb-4 text-base sm:text-lg flex items-center gap-2">
                 ✨ Features:
               </h3>
-              <ul className="text-sm text-gray-200 space-y-3">
-                <li className="flex items-center gap-3 animate-fade-in delay-100">
-                  <span className="text-green-400 font-bold text-xl">✓</span>
+              <ul className="text-xs sm:text-sm text-gray-200 space-y-2 sm:space-y-3">
+                <li className="flex items-start gap-2 sm:gap-3 animate-fade-in delay-100">
+                  <span className="text-green-400 font-bold text-lg sm:text-xl flex-shrink-0">✓</span>
                   <span>Write Up to 100,000 Characters — Ultra-High Quality</span>
                 </li>
-                <li className="flex items-center gap-3 animate-fade-in delay-200">
-                  <span className="text-green-400 font-bold text-xl">✓</span>
+                <li className="flex items-start gap-2 sm:gap-3 animate-fade-in delay-200">
+                  <span className="text-green-400 font-bold text-lg sm:text-xl flex-shrink-0">✓</span>
                   <span>Ultimate Long-Form Script Engine</span>
                 </li>
-                <li className="flex items-center gap-3 animate-fade-in delay-300">
-                  <span className="text-green-400 font-bold text-xl">✓</span>
+                <li className="flex items-start gap-2 sm:gap-3 animate-fade-in delay-300">
+                  <span className="text-green-400 font-bold text-lg sm:text-xl flex-shrink-0">✓</span>
                   <span>The Ultimate AI Story Generator — 10x More Powerful</span>
                 </li>
-                <li className="flex items-center gap-3 animate-fade-in delay-400">
-                  <span className="text-green-400 font-bold text-xl">✓</span>
+                <li className="flex items-start gap-2 sm:gap-3 animate-fade-in delay-400">
+                  <span className="text-green-400 font-bold text-lg sm:text-xl flex-shrink-0">✓</span>
                   <span>Story Generation Without Limits</span>
                 </li>
               </ul>
@@ -73,7 +73,7 @@ function AppContent() {
             <LoginButton />
           </div>
 
-          <p className="text-xs text-gray-400 text-center mt-6 animate-fade-in delay-600">
+          <p className="text-xs text-gray-400 text-center mt-4 sm:mt-6 animate-fade-in delay-600">
             🔒 Note: This is a demo login. Discord OAuth will be integrated later.
           </p>
         </div>
@@ -160,10 +160,10 @@ function AppContent() {
       {/* AMAZING ANIMATED BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Animated gradient orbs */}
-        <div className="absolute w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-3xl -top-48 -left-48 animate-float"></div>
-        <div className="absolute w-[500px] h-[500px] bg-pink-500/15 rounded-full blur-3xl top-1/3 -right-64 animate-float-slow"></div>
-        <div className="absolute w-[450px] h-[450px] bg-blue-500/20 rounded-full blur-3xl bottom-0 left-1/4 animate-float-slower"></div>
-        <div className="absolute w-[400px] h-[400px] bg-cyan-400/15 rounded-full blur-3xl top-2/3 right-1/3 animate-pulse-slow"></div>
+        <div className="absolute w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-purple-600/20 rounded-full blur-3xl -top-24 sm:-top-48 -left-24 sm:-left-48 animate-float"></div>
+        <div className="absolute w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-pink-500/15 rounded-full blur-3xl top-1/3 -right-32 sm:-right-64 animate-float-slow"></div>
+        <div className="absolute w-[300px] sm:w-[450px] h-[300px] sm:h-[450px] bg-blue-500/20 rounded-full blur-3xl bottom-0 left-1/4 animate-float-slower"></div>
+        <div className="absolute w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-cyan-400/15 rounded-full blur-3xl top-2/3 right-1/3 animate-pulse-slow"></div>
 
         {/* Gradient mesh overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/5 via-transparent to-blue-900/5"></div>
@@ -175,31 +175,31 @@ function AppContent() {
       </div>
 
       {/* Header */}
-      <header className="relative bg-slate-800/60 backdrop-blur-2xl shadow-2xl shadow-purple-500/10 border-b border-purple-500/30">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <header className="relative bg-slate-800/60 backdrop-blur-2xl shadow-2xl shadow-purple-500/10 border-b border-purple-500/30 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="animate-fade-in">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-8 h-8 text-purple-400 animate-spin-slow" />
-                <h1 className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+            <div className="animate-fade-in flex-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 animate-spin-slow flex-shrink-0" />
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent truncate">
                   FacelessScriptPro
                 </h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 animate-slide-in-left">
+            <div className="flex items-center gap-2 sm:gap-4 animate-slide-in-left">
               {user.avatar && (
                 <img
                   src={user.avatar}
                   alt={user.username}
-                  className="w-12 h-12 rounded-full border-2 border-purple-500/50 shadow-lg shadow-purple-500/30"
+                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full border-2 border-purple-500/50 shadow-lg shadow-purple-500/30 flex-shrink-0"
                 />
               )}
               <div className="text-right">
-                <div className="text-sm font-bold text-white">{user.username}</div>
+                <div className="text-xs sm:text-sm font-bold text-white truncate max-w-[80px] sm:max-w-none">{user.username}</div>
                 <button
                   onClick={logout}
-                  className="text-xs text-purple-300 hover:text-pink-300 transition-colors duration-300"
+                  className="text-xs text-purple-300 hover:text-pink-300 transition-colors duration-300 whitespace-nowrap"
                 >
                   Logout →
                 </button>
@@ -210,8 +210,8 @@ function AppContent() {
       </header>
 
       {/* Main Content */}
-      <main className="relative py-8">
-        <div className="max-w-7xl mx-auto px-6">
+      <main className="relative py-4 sm:py-6 md:py-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6">
           {/* API Key Manager */}
           <ApiKeyManager />
 
@@ -221,10 +221,10 @@ function AppContent() {
       </main>
 
       {/* Footer */}
-      <footer className="relative bg-slate-800/40 backdrop-blur-2xl border-t border-purple-500/30 mt-12">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <footer className="relative bg-slate-800/40 backdrop-blur-2xl border-t border-purple-500/30 mt-8 sm:mt-12">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 md:py-8">
           <div className="text-center">
-            <p className="text-sm text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-400">
               &copy; 2025 FacelessScriptPro. All rights reserved.
             </p>
           </div>
