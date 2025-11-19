@@ -189,17 +189,17 @@ export default function ScriptGenerator() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Script Generator</h1>
-        <p className="text-gray-600">Create high-quality scripts for faceless YouTube videos</p>
+    <div className="max-w-5xl mx-auto p-3 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">Script Generator</h1>
+        <p className="text-sm sm:text-base text-gray-600">Create high-quality scripts for faceless YouTube videos</p>
       </div>
 
       {/* Form */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
         {/* Title */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="mb-4 sm:mb-6">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             Script Title *
           </label>
           <input
@@ -207,28 +207,28 @@ export default function ScriptGenerator() {
             placeholder="e.g., The Mystery of the Bermuda Triangle"
             value={formData.title}
             onChange={e => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         {/* Category Selector */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+        <div className="mb-4 sm:mb-6">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
             Select Category *
           </label>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
             {CATEGORIES.map(category => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`p-4 rounded-lg border-2 transition-all ${
+                className={`p-3 sm:p-4 rounded-lg border-2 transition-all ${
                   selectedCategory === category.id
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="text-3xl mb-1">{category.icon}</div>
-                <div className="text-sm font-medium">{category.name}</div>
+                <div className="text-2xl sm:text-3xl mb-1">{category.icon}</div>
+                <div className="text-xs sm:text-sm font-medium">{category.name}</div>
               </button>
             ))}
           </div>
@@ -236,26 +236,26 @@ export default function ScriptGenerator() {
 
         {/* Niche Selector */}
         {selectedCategory && (
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <div className="mb-4 sm:mb-6">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
               Select Niche *
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
               {NICHES_BY_CATEGORY[selectedCategory].map(niche => (
                 <button
                   key={niche.id}
                   onClick={() => handleNicheSelect(niche)}
-                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                  className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-all ${
                     formData.niche === niche.name
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">{niche.icon}</span>
-                    <div>
-                      <div className="font-semibold text-gray-900">{niche.name}</div>
-                      <div className="text-sm text-gray-600 mt-1">{niche.description}</div>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <span className="text-xl sm:text-2xl flex-shrink-0">{niche.icon}</span>
+                    <div className="min-w-0">
+                      <div className="text-sm sm:text-base font-semibold text-gray-900">{niche.name}</div>
+                      <div className="text-xs sm:text-sm text-gray-600 mt-1">{niche.description}</div>
                     </div>
                   </div>
                 </button>
@@ -266,24 +266,22 @@ export default function ScriptGenerator() {
 
         {/* Auto-Generate Plot Section */}
         {formData.niche && (
-          <div className="mb-6">
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    🎬 Auto-Generate Plot
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Let AI create a detailed plot outline based on your title and niche
-                  </p>
-                </div>
+          <div className="mb-4 sm:mb-6">
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg p-4 sm:p-6">
+              <div className="mb-3 sm:mb-4">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
+                  🎬 Auto-Generate Plot
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  Let AI create a detailed plot outline based on your title and niche
+                </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleAutoGeneratePlot}
                 disabled={isGeneratingPlot || !formData.title || !formData.niche}
-                className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg text-base font-bold transition-all ${
+                className={`w-full flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-lg text-sm sm:text-base font-bold transition-all ${
                   isGeneratingPlot || !formData.title || !formData.niche
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl'
@@ -291,15 +289,15 @@ export default function ScriptGenerator() {
               >
                 {isGeneratingPlot ? (
                   <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Generating Plot with AI...
+                    <span className="truncate">Generating Plot with AI...</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     Generate Plot Automatically
@@ -308,11 +306,11 @@ export default function ScriptGenerator() {
               </button>
 
               {!formData.title || !formData.niche ? (
-                <div className="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <div className="mt-3 text-xs sm:text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 sm:p-3">
                   💡 Enter a title and select a niche above to enable auto-generation
                 </div>
               ) : (
-                <div className="mt-3 text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3">
+                <div className="mt-3 text-xs sm:text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-2 sm:p-3 break-words">
                   ✨ Ready! Click to generate a plot for: <strong>{formData.title}</strong>
                 </div>
               )}
@@ -321,24 +319,24 @@ export default function ScriptGenerator() {
         )}
 
         {/* Script Example */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="mb-4 sm:mb-6">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             Script Example * (min 500 characters)
           </label>
           <textarea
             placeholder="Paste an example script that matches the style you want. The AI will analyze its writing patterns..."
             value={formData.scriptExample}
             onChange={e => setFormData({ ...formData, scriptExample: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-40 font-mono text-sm"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32 sm:h-40 font-mono text-xs sm:text-sm"
           />
-          <div className="text-sm text-gray-500 mt-1">
+          <div className="text-xs sm:text-sm text-gray-500 mt-1">
             {formData.scriptExample.length} / 500 characters minimum
           </div>
         </div>
 
         {/* Plot Details */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="mb-4 sm:mb-6">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             Plot Details *
           </label>
           <textarea
@@ -351,23 +349,23 @@ export default function ScriptGenerator() {
                 setPlotWasAutoGenerated(false);
               }
             }}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24 sm:h-32 text-sm sm:text-base"
           />
 
           {/* Plot Action Buttons */}
           {plotWasAutoGenerated && formData.plotDetails && (
-            <div className="mt-4 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-lg p-4">
-              <p className="text-sm font-semibold text-gray-800 mb-3">
+            <div className="mt-3 sm:mt-4 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-lg p-3 sm:p-4">
+              <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-2 sm:mb-3">
                 ✨ Plot generated! Choose an option:
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                 {/* Accept Button */}
                 <button
                   type="button"
                   onClick={handleAcceptPlot}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
+                  className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm sm:text-base font-semibold transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Accept Plot
@@ -378,7 +376,7 @@ export default function ScriptGenerator() {
                   type="button"
                   onClick={handleRegeneratePlot}
                   disabled={isGeneratingPlot}
-                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-colors ${
+                  className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-colors ${
                     isGeneratingPlot
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -386,15 +384,15 @@ export default function ScriptGenerator() {
                 >
                   {isGeneratingPlot ? (
                     <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Regenerating...
+                      <span className="truncate">Regenerating...</span>
                     </>
                   ) : (
                     <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                       Regenerate
@@ -406,15 +404,15 @@ export default function ScriptGenerator() {
                 <button
                   type="button"
                   onClick={handleRejectPlot}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
+                  className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm sm:text-base font-semibold transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                   Reject Plot
                 </button>
               </div>
-              <p className="text-xs text-gray-600 mt-3">
+              <p className="text-xs text-gray-600 mt-2 sm:mt-3">
                 💡 You can also edit the plot directly in the textarea above
               </p>
             </div>
@@ -422,27 +420,27 @@ export default function ScriptGenerator() {
         </div>
 
         {/* Extra Instructions */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="mb-4 sm:mb-6">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             Additional Instructions (Optional)
           </label>
           <textarea
             placeholder="Any specific requirements or stylistic preferences..."
             value={formData.extraInstructions}
             onChange={e => setFormData({ ...formData, extraInstructions: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-24"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-20 sm:h-24 text-sm sm:text-base"
           />
         </div>
 
         {/* Target Length */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="mb-4 sm:mb-6">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             Target Script Length *
           </label>
           <select
             value={formData.targetCharacters}
             onChange={e => setFormData({ ...formData, targetCharacters: parseInt(e.target.value) })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           >
             {TARGET_LENGTHS.map(option => (
               <option key={option.value} value={option.value}>
@@ -456,7 +454,7 @@ export default function ScriptGenerator() {
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className={`w-full py-4 rounded-lg font-bold text-white text-lg transition-all ${
+          className={`w-full py-3 sm:py-4 rounded-lg font-bold text-white text-base sm:text-lg transition-all ${
             isGenerating
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl'
@@ -468,20 +466,20 @@ export default function ScriptGenerator() {
 
       {/* Progress Indicator */}
       {isGenerating && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="mb-4">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="mb-3 sm:mb-4">
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-semibold text-gray-700">{statusMessage}</span>
-              <span className="text-sm font-semibold text-gray-700">{progress}%</span>
+              <span className="text-xs sm:text-sm font-semibold text-gray-700 truncate pr-2">{statusMessage}</span>
+              <span className="text-xs sm:text-sm font-semibold text-gray-700 flex-shrink-0">{progress}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
               <div
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 h-3 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 sm:h-3 rounded-full transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
-          <p className="text-sm text-gray-600 text-center">
+          <p className="text-xs sm:text-sm text-gray-600 text-center">
             This may take a few moments. Please don't close this page.
           </p>
         </div>
@@ -489,21 +487,21 @@ export default function ScriptGenerator() {
 
       {/* Result */}
       {finalScript && (
-        <div id="result-section" className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">✅ Script Generated!</h2>
+        <div id="result-section" className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">✅ Script Generated!</h2>
 
-          <div className="bg-gray-50 rounded-lg p-6 mb-6 max-h-96 overflow-y-auto border border-gray-200">
-            <pre className="whitespace-pre-wrap font-sans text-gray-800 leading-relaxed">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-6 mb-4 sm:mb-6 max-h-64 sm:max-h-96 overflow-y-auto border border-gray-200">
+            <pre className="whitespace-pre-wrap font-sans text-xs sm:text-sm md:text-base text-gray-800 leading-relaxed">
               {finalScript}
             </pre>
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm sm:text-base font-semibold transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
               Download Script
@@ -511,9 +509,9 @@ export default function ScriptGenerator() {
 
             <button
               onClick={handleCopy}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm sm:text-base font-semibold transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
               </svg>
               Copy to Clipboard
